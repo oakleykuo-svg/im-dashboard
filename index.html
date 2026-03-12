@@ -3,75 +3,119 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IM Performance Hub</title>
+    <title>IM Capacity Intelligence Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background: #fdfdfd; }
-        .tech-font { font-family: 'Orbitron', sans-serif; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(225, 79, 75, 0.1);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
-            border-radius: 20px;
+        :root { --brand: #E14f4B; --brand-light: rgba(225, 79, 75, 0.1); }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #f8fafc; color: #1e293b; }
+        .tech-card {
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(225, 79, 75, 0.08);
+            border-radius: 24px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
-        .brand-text { color: #E14f4B; }
-        .brand-bg { background-color: #E14f4B; }
+        .tech-card:hover { transform: translateY(-5px); box-shadow: 0 20px 40px rgba(225, 79, 75, 0.1); }
+        .brand-gradient { background: linear-gradient(135deg, #E14f4B 0%, #b91c1c 100%); }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; margin-right: 6px; }
+        .grid-bg { background-image: radial-gradient(var(--brand-light) 1px, transparent 1px); background-size: 30px 30px; }
+        .num-font { font-family: 'JetBrains Mono', monospace; }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <!-- Header -->
-    <nav class="flex justify-between items-center mb-10">
-        <h1 class="text-3xl font-bold brand-text tracking-tighter italic">IM PERFORMANCE HUB</h1>
-        <div class="px-4 py-2 glass-card text-sm font-medium">
-            Status: <span class="text-green-500">● Live Connection</span>
+<body class="grid-bg min-h-screen">
+    <!-- Top Nav -->
+    <nav class="sticky top-0 z-50 px-6 py-4 bg-white/70 backdrop-blur-md border-b border-gray-100 flex justify-between items-center">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 brand-gradient rounded-xl flex items-center justify-center text-white font-bold text-xl shadow-lg">IM</div>
+            <h1 class="text-xl font-extrabold tracking-tight">PERFORMANCE <span class="text-[#E14f4B]">INTELLIGENCE</span></h1>
+        </div>
+        <div class="flex gap-4">
+            <div class="px-4 py-1.5 rounded-full bg-green-50 text-green-600 text-xs font-bold border border-green-100 flex items-center">
+                <span class="status-dot bg-green-500 animate-pulse"></span> SYSTEM LIVE
+            </div>
+            <button onclick="location.reload()" class="p-2 hover:bg-gray-100 rounded-full transition-colors">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8"></path><path d="M21 3v5h-5"></path><path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16"></path><path d="M3 21v-5h5"></path></svg>
+            </button>
         </div>
     </nav>
 
-    <!-- Top Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div class="glass-card p-6 border-l-8 border-[#E14f4B]">
-            <p class="text-gray-500 text-sm mb-1">團隊總產值指數</p>
-            <h2 id="totalIndex" class="text-4xl font-bold tech-font brand-text">0</h2>
+    <main class="max-w-7xl mx-auto p-6 md:p-10">
+        <!-- Dashboard Stats -->
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10">
+            <div class="tech-card p-6 border-b-4 border-[#E14f4B]">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Total Score</p>
+                <h2 id="totalIndex" class="text-4xl font-extrabold num-font text-gray-900">0</h2>
+                <div class="mt-2 text-xs text-gray-400">團隊當前總負載指數</div>
+            </div>
+            <div class="tech-card p-6">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Active Projects</p>
+                <h2 id="totalExecuting" class="text-4xl font-extrabold num-font text-gray-900">0</h2>
+                <div class="mt-2 text-xs text-green-500 font-bold">目前執行中專案</div>
+            </div>
+            <div class="tech-card p-6">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Avg Loading</p>
+                <h2 id="avgLoading" class="text-4xl font-extrabold num-font text-gray-900">0</h2>
+                <div class="mt-2 text-xs text-gray-400">平均單人承載分數</div>
+            </div>
+            <div class="tech-card p-6">
+                <p class="text-xs font-bold text-gray-400 uppercase tracking-widest mb-2">Avg Per Case</p>
+                <h2 id="avgPerCase" class="text-4xl font-extrabold num-font text-gray-900">0</h2>
+                <div class="mt-2 text-xs text-gray-400">目前單案平均重量</div>
+            </div>
         </div>
-        <div class="glass-card p-6">
-            <p class="text-gray-500 text-sm mb-1">執行中案件總數</p>
-            <h2 id="totalExecuting" class="text-4xl font-bold tech-font text-gray-800">0</h2>
-        </div>
-        <div class="glass-card p-6">
-            <p class="text-gray-500 text-sm mb-1">平均每人負載</p>
-            <h2 id="avgLoading" class="text-4xl font-bold tech-font text-gray-800">0</h2>
-        </div>
-    </div>
 
-    <!-- Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-        <div class="glass-card p-6">
-            <h3 class="text-lg font-bold mb-4 border-b pb-2">IM 個人總量能分佈 (總產值)</h3>
-            <canvas id="memberChart"></canvas>
-        </div>
-        <div class="glass-card p-6">
-            <h3 class="text-lg font-bold mb-4 border-b pb-2">專案階段佔比</h3>
-            <canvas id="stageChart"></canvas>
-        </div>
-    </div>
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <!-- Left: Leaderboard -->
+            <div class="lg:col-span-2 space-y-8">
+                <div class="tech-card p-8">
+                    <div class="flex justify-between items-end mb-8">
+                        <div>
+                            <h3 class="text-2xl font-extrabold italic">IM CAPACITY LEADERBOARD</h3>
+                            <p class="text-sm text-gray-400">個人量能即時分佈圖</p>
+                        </div>
+                        <div class="text-right text-xs text-gray-400">Standard: 500 PTs</div>
+                    </div>
+                    <div id="memberList" class="space-y-8">
+                        <!-- Bars injected here -->
+                        <div class="animate-pulse flex space-x-4">數據讀取中...</div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Member Details List -->
-    <div class="glass-card p-6 overflow-hidden">
-        <h3 class="text-lg font-bold mb-6 italic brand-text tracking-widest">IM CAPACITY LEADERBOARD</h3>
-        <div id="memberList" class="space-y-4">
-            <!-- Loading Bars will be injected here -->
+            <!-- Right: Chart Section -->
+            <div class="space-y-8">
+                <div class="tech-card p-6">
+                    <h3 class="text-sm font-bold uppercase tracking-widest text-gray-400 mb-6">Stage Distribution</h3>
+                    <canvas id="stageChart" height="300"></canvas>
+                </div>
+                <div class="tech-card p-6 brand-gradient text-white">
+                    <h3 class="text-sm font-bold uppercase tracking-widest opacity-70 mb-4">Management Insight</h3>
+                    <p id="insightText" class="text-lg font-medium leading-relaxed">
+                        正在分析團隊數據...
+                    </p>
+                </div>
+            </div>
         </div>
-    </div>
+    </main>
 
     <script>
-        // 抓取 GitHub 上的 data.json
-        fetch('data.json')
+        // 設定快取防止抓不到舊資料
+        const DATA_URL = 'data.json?v=' + new Date().getTime();
+
+        fetch(DATA_URL)
             .then(res => res.json())
             .then(data => {
+                if (!data || data.length === 0) {
+                    alert("抓到空資料，請檢查 Google Sheets 總表是否有內容！");
+                    return;
+                }
                 processDashboard(data);
+            })
+            .catch(err => {
+                console.error(err);
+                document.getElementById('memberList').innerHTML = "資料讀取失敗，請確認 data.json 是否存在於 GitHub。";
             });
 
         function processDashboard(data) {
@@ -81,70 +125,84 @@
             let executingCount = 0;
 
             data.forEach(item => {
-                const name = item["IM PIC"];
-                const score = parseFloat(item["產值指數"]) || 0;
-                const status = item["狀態"];
+                // 自動清理 Key 中的空格 (防止 Google Sheets 標題多打一個空格)
+                const cleanItem = {};
+                Object.keys(item).forEach(key => cleanItem[key.trim()] = item[key]);
+
+                const name = cleanItem["IM PIC"] || "Unknown";
+                const score = parseFloat(cleanItem["產值指數"]) || 0;
+                const status = cleanItem["狀態"] || "Other";
 
                 totalIndex += score;
                 if(status === "Executing") executingCount++;
 
-                // 統計個人資料
                 if(!memberData[name]) memberData[name] = { score: 0, count: 0 };
                 memberData[name].score += score;
                 memberData[name].count += 1;
 
-                // 統計階段
                 stages[status] = (stages[status] || 0) + 1;
             });
 
-            // 更新面板數字
+            const memberCount = Object.keys(memberData).length;
+            const avgLoad = totalIndex / memberCount;
+
+            // 更新面板
             document.getElementById('totalIndex').innerText = Math.round(totalIndex);
             document.getElementById('totalExecuting').innerText = executingCount;
-            document.getElementById('avgLoading').innerText = Math.round(totalIndex / Object.keys(memberData).length);
+            document.getElementById('avgLoading').innerText = Math.round(avgLoad);
+            document.getElementById('avgPerCase').innerText = (totalIndex / data.length).toFixed(1);
 
-            // 1. 成員長條圖
-            const ctx1 = document.getElementById('memberChart').getContext('2d');
-            new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(memberData),
-                    datasets: [{
-                        label: '產值指數',
-                        data: Object.values(memberData).map(m => m.score),
-                        backgroundColor: '#E14f4B'
-                    }]
-                },
-                options: { borderRadius: 10 }
-            });
+            // 產值建議
+            const insight = avgLoad > 600 ? "⚠️ 團隊平均負載過高，建議暫停進新案。" : "✅ 目前團隊量能充足，可持續進案。";
+            document.getElementById('insightText').innerText = insight;
 
-            // 2. 階段圓餅圖
-            const ctx2 = document.getElementById('stageChart').getContext('2d');
-            new Chart(ctx2, {
+            // 1. 階段圓餅圖 (使用品牌紅漸層)
+            new Chart(document.getElementById('stageChart'), {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(stages),
                     datasets: [{
                         data: Object.values(stages),
-                        backgroundColor: ['#E14f4B', '#f59e0b', '#3b82f6', '#10b981', '#6b7280']
+                        backgroundColor: ['#E14f4B', '#F87171', '#FECACA', '#475569', '#94a3b8'],
+                        borderWidth: 0
                     }]
                 },
-                options: { cutout: '70%' }
+                options: { cutout: '80%', plugins: { legend: { position: 'bottom', labels: { usePointStyle: true, padding: 20 } } } }
             });
 
-            // 3. 戰力排行細節
+            // 2. 排行榜列表
             const listContainer = document.getElementById('memberList');
+            listContainer.innerHTML = '';
+            
             Object.entries(memberData).sort((a,b) => b[1].score - a[1].score).forEach(([name, val]) => {
-                const percent = Math.min((val.score / 600) * 100, 100); // 假設上限 600 分
-                const colorClass = percent > 85 ? 'bg-red-600' : (percent > 60 ? 'bg-yellow-500' : 'bg-green-500');
-                
+                const percent = Math.min((val.score / 800) * 100, 100); 
+                let statusColor = "#E14f4B";
+                let statusLabel = "Normal";
+
+                if(percent > 85) { statusColor = "#ef4444"; statusLabel = "OVERLOAD"; }
+                else if(percent > 60) { statusColor = "#f59e0b"; statusLabel = "BUSY"; }
+                else { statusColor = "#10b981"; statusLabel = "HEALTHY"; }
+
                 listContainer.innerHTML += `
-                    <div class="mb-4">
-                        <div class="flex justify-between mb-1">
-                            <span class="font-bold">${name}</span>
-                            <span class="tech-font text-sm font-bold ${percent > 85 ? 'text-red-600' : ''}">${Math.round(val.score)} PTs</span>
+                    <div class="group">
+                        <div class="flex justify-between items-center mb-3">
+                            <div>
+                                <span class="text-lg font-extrabold mr-2">${name}</span>
+                                <span class="text-[10px] font-black px-2 py-0.5 rounded border" style="color: ${statusColor}; border-color: ${statusColor}">${statusLabel}</span>
+                            </div>
+                            <div class="text-right">
+                                <span class="num-font font-bold text-xl">${Math.round(val.score)}</span>
+                                <span class="text-xs text-gray-400">/ 800</span>
+                            </div>
                         </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="h-2.5 rounded-full ${colorClass}" style="width: ${percent}%"></div>
+                        <div class="relative h-4 w-full bg-gray-100 rounded-full overflow-hidden">
+                            <div class="absolute top-0 left-0 h-full rounded-full transition-all duration-1000" 
+                                 style="width: ${percent}%; background-color: ${statusColor}; box-shadow: 0 0 10px ${statusColor}44">
+                            </div>
+                        </div>
+                        <div class="flex justify-between mt-2">
+                            <span class="text-[10px] text-gray-400 uppercase font-bold tracking-tighter">${val.count} Active Cases</span>
+                            <span class="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Avg Case: ${Math.round(val.score/val.count)}pt</span>
                         </div>
                     </div>
                 `;
