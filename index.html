@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IM Performance Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background: #fdfdfd; }
+        .tech-font { font-family: 'Orbitron', sans-serif; }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(225, 79, 75, 0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+            border-radius: 20px;
+        }
+        .brand-text { color: #E14f4B; }
+        .brand-bg { background-color: #E14f4B; }
+    </style>
+</head>
+<body class="p-4 md:p-8">
+    <!-- Header -->
+    <nav class="flex justify-between items-center mb-10">
+        <h1 class="text-3xl font-bold brand-text tracking-tighter italic">IM PERFORMANCE HUB</h1>
+        <div class="px-4 py-2 glass-card text-sm font-medium">
+            Status: <span class="text-green-500">● Live Connection</span>
+        </div>
+    </nav>
+
+    <!-- Top Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="glass-card p-6 border-l-8 border-[#E14f4B]">
+            <p class="text-gray-500 text-sm mb-1">團隊總產值指數</p>
+            <h2 id="totalIndex" class="text-4xl font-bold tech-font brand-text">0</h2>
+        </div>
+        <div class="glass-card p-6">
+            <p class="text-gray-500 text-sm mb-1">執行中案件總數</p>
+            <h2 id="totalExecuting" class="text-4xl font-bold tech-font text-gray-800">0</h2>
+        </div>
+        <div class="glass-card p-6">
+            <p class="text-gray-500 text-sm mb-1">平均每人負載</p>
+            <h2 id="avgLoading" class="text-4xl font-bold tech-font text-gray-800">0</h2>
+        </div>
+    </div>
+
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+        <div class="glass-card p-6">
+            <h3 class="text-lg font-bold mb-4 border-b pb-2">IM 個人總量能分佈 (總產值)</h3>
+            <canvas id="memberChart"></canvas>
+        </div>
+        <div class="glass-card p-6">
+            <h3 class="text-lg font-bold mb-4 border-b pb-2">專案階段佔比</h3>
+            <canvas id="stageChart"></canvas>
+        </div>
+    </div>
+
+    <!-- Member Details List -->
+    <div class="glass-card p-6 overflow-hidden">
+        <h3 class="text-lg font-bold mb-6 italic brand-text tracking-widest">IM CAPACITY LEADERBOARD</h3>
+        <div id="memberList" class="space-y-4">
+            <!-- Loading Bars will be injected here -->
+        </div>
+    </div>
+
+    <script>
+        // 抓取 GitHub 上的 data.json
+        fetch('data.json')
+            .then(res => res.json())
+            .then(data => {
+                processDashboard(data);
+            });
+
+        function processDashboard(data) {
+            let memberData = {};
+            let totalIndex = 0;
+            let stages = {};
+            let executingCount = 0;
+
+            data.forEach(item => {
+                const name = item["IM PIC"];
+                const score = parseFloat(item["產值指數"]) || 0;
+                const status = item["狀態"];
+
+                totalIndex += score;
+                if(status === "Executing") executingCount++;
+
+                // 統計個人資料
+                if(!memberData[name]) memberData[name] = { score: 0, count: 0 };
+                memberData[name].score += score;
+                memberData[name].count += 1;
+
+                // 統計階段
+                stages[status] = (stages[status] || 0) + 1;
+            });
+
+            // 更新面板數字
+            document.getElementById('totalIndex').innerText = Math.round(totalIndex);
+            document.getElementById('totalExecuting').innerText = executingCount;
+            document.getElementById('avgLoading').innerText = Math.round(totalIndex / Object.keys(memberData).length);
+
+            // 1. 成員長條圖
+            const ctx1 = document.getElementById('memberChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(memberData),
+                    datasets: [{
+                        label: '產值指數',
+                        data: Object.values(memberData).map(m => m.score),
+                        backgroundColor: '#E14f4B'
+                    }]
+                },
+                options: { borderRadius: 10 }
+            });
+
+            // 2. 階段圓餅圖
+            const ctx2 = document.getElementById('stageChart').getContext('2d');
+            new Chart(ctx2, {
+                type: 'doughnut',
+                data: {
+                    labels: Object.keys(stages),
+                    datasets: [{
+                        data: Object.values(stages),
+                        backgroundColor: ['#E14f4B', '#f59e0b', '#3b82f6', '#10b981', '#6b7280']
+                    }]
+                },
+                options: { cutout: '70%' }
+            });
+
+            // 3. 戰力排行細節
+            const listContainer = document.getElementById('memberList');
+            Object.entries(memberData).sort((a,b) => b[1].score - a[1].score).forEach(([name, val]) => {
+                const percent = Math.min((val.score / 600) * 100, 100); // 假設上限 600 分
+                const colorClass = percent > 85 ? 'bg-red-600' : (percent > 60 ? 'bg-yellow-500' : 'bg-green-500');
+                
+                listContainer.innerHTML += `
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-1">
+                            <span class="font-bold">${name}</span>
+                            <span class="tech-font text-sm font-bold ${percent > 85 ? 'text-red-600' : ''}">${Math.round(val.score)} PTs</span>
+                        </div>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="h-2.5 rounded-full ${colorClass}" style="width: ${percent}%"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+    </script>
+</body>
+</html>
