@@ -1,155 +1,473 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IM Performance Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap');
-        body { font-family: 'Noto Sans TC', sans-serif; background: #fdfdfd; }
-        .tech-font { font-family: 'Orbitron', sans-serif; }
-        .glass-card {
-            background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: blur(10px);
-            border: 1px solid rgba(225, 79, 75, 0.1);
-            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
-            border-radius: 20px;
-        }
-        .brand-text { color: #E14f4B; }
-        .brand-bg { background-color: #E14f4B; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>IM Capacity · Signal</title>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+
+  <style>
+    :root {
+      --brand:         #E14F4B;
+      --brand-soft:    rgba(225, 79, 75, 0.09);
+      --brand-mid:     rgba(225, 79, 75, 0.22);
+      --brand-glow:    rgba(225, 79, 75, 0.18);
+      --bg:            #F5F3F0;
+      --glass:         rgba(255, 255, 255, 0.62);
+      --glass-strong:  rgba(255, 255, 255, 0.82);
+      --glass-border:  rgba(255, 255, 255, 0.90);
+      --glass-edge:    rgba(200, 195, 188, 0.45);
+      --text-primary:  #1A1814;
+      --text-secondary:#6B6760;
+      --text-muted:    #AAA49D;
+      --amber:  #D4820A;
+      --green:  #1B9E5A;
+      --blue:   #2B72C8;
+      --purple: #7C5CBF;
+      --r: 18px;
+      --shadow: 0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
+      --shadow-md: 0 8px 40px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+    body::before {
+      content: '';
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 70% 50% at 15% -5%,  rgba(225,79,75,0.07)  0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 85% 100%, rgba(43,114,200,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 60% 60% at 50% 50%,  rgba(255,252,248,0.9) 0%, transparent 100%);
+    }
+    .layout {
+      position: relative; z-index: 1;
+      max-width: 1400px; margin: 0 auto;
+      padding: 20px 24px 56px;
+    }
+    .card {
+      background: var(--glass);
+      backdrop-filter: blur(24px) saturate(1.6);
+      -webkit-backdrop-filter: blur(24px) saturate(1.6);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--r);
+      box-shadow: var(--shadow);
+      transition: box-shadow 0.25s, border-color 0.25s;
+    }
+    .card:hover { box-shadow: var(--shadow-md); border-color: rgba(255,255,255,0.98); }
+
+    /* NAV */
+    nav {
+      display: flex; align-items: center;
+      justify-content: space-between; gap: 12px;
+      padding: 10px 14px 10px 12px;
+      margin-bottom: 28px;
+      background: var(--glass-strong);
+      backdrop-filter: blur(28px) saturate(1.8);
+      -webkit-backdrop-filter: blur(28px) saturate(1.8);
+      border: 1px solid var(--glass-border);
+      border-radius: 100px;
+      box-shadow: var(--shadow);
+      flex-wrap: wrap;
+      animation: fadeUp 0.4s ease both;
+    }
+    .logo { display: flex; align-items: center; gap: 10px; }
+    .logo-mark {
+      width: 36px; height: 36px; border-radius: 11px;
+      background: rgba(255,255,255,0.55);
+      backdrop-filter: blur(16px) saturate(2);
+      -webkit-backdrop-filter: blur(16px) saturate(2);
+      border: 1.5px solid rgba(255,255,255,0.92);
+      box-shadow: 0 2px 14px rgba(225,79,75,0.14), inset 0 1px 1px rgba(255,255,255,0.85);
+      display: grid; place-items: center;
+      flex-shrink: 0; position: relative; overflow: hidden;
+    }
+    .logo-mark::before {
+      content: ''; position: absolute; inset: 0;
+      background: linear-gradient(135deg, rgba(225,79,75,0.13) 0%, rgba(225,79,75,0.04) 100%);
+    }
+    .logo-mark svg { width: 17px; height: 17px; stroke: var(--brand); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; position: relative; z-index: 1; }
+    .logo-text { font-family: 'Orbitron', sans-serif; font-size: 13px; font-weight: 800; letter-spacing: 0.08em; color: var(--text-primary); }
+    .logo-text em { color: var(--brand); font-style: normal; }
+    #lastUpdated { font-size: 11px; color: var(--text-muted); font-weight: 300; margin-top: 2px; }
+
+    .nav-filters { display: flex; align-items: center; gap: 3px; }
+    .nav-filter-btn {
+      padding: 7px 18px; border-radius: 100px; border: none;
+      background: transparent; color: var(--text-secondary);
+      font-family: 'DM Sans', sans-serif; font-size: 13px; font-weight: 500;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .nav-filter-btn:hover { color: var(--text-primary); background: rgba(0,0,0,0.04); }
+    .nav-filter-btn.active {
+      background: linear-gradient(135deg, #E14F4B, #C84040);
+      color: #fff; box-shadow: 0 2px 12px rgba(225,79,75,0.28);
+    }
+
+    .live-badge {
+      display: flex; align-items: center; gap: 6px;
+      padding: 6px 14px; border-radius: 100px;
+      background: rgba(27,158,90,0.10); border: 1px solid rgba(27,158,90,0.20);
+      font-size: 12px; font-weight: 600; color: var(--green); white-space: nowrap;
+    }
+    .live-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--green); box-shadow: 0 0 6px var(--green);
+      animation: blink 2s ease infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
+
+    /* KPIs */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(200px,1fr)); gap: 14px; margin-bottom: 20px; }
+    .kpi-card { padding: 22px 24px 18px; position: relative; overflow: hidden; }
+    .kpi-card::before {
+      content: ''; position: absolute; top: 0; right: 0;
+      width: 130px; height: 130px; border-radius: 50%;
+      transform: translate(40%,-40%); opacity: 0.7;
+    }
+    .kpi-card.c-brand::before { background: radial-gradient(circle,rgba(225,79,75,0.13),transparent 70%); }
+    .kpi-card.c-amber::before { background: radial-gradient(circle,rgba(212,130,10,0.12),transparent 70%); }
+    .kpi-card.c-green::before { background: radial-gradient(circle,rgba(27,158,90,0.12),transparent 70%); }
+    .kpi-card.c-blue::before  { background: radial-gradient(circle,rgba(43,114,200,0.12),transparent 70%); }
+    .kpi-card.primary-accent  { border-top: 3px solid var(--brand); padding-top: 20px; }
+
+    .kpi-label {
+      display: flex; align-items: center; gap: 7px;
+      font-size: 11px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
+      color: var(--text-muted); margin-bottom: 12px;
+    }
+    .kpi-icon {
+      width: 26px; height: 26px; border-radius: 8px;
+      display: grid; place-items: center; flex-shrink: 0;
+    }
+    .kpi-icon svg { width: 13px; height: 13px; fill: none; stroke-width: 2; stroke-linecap: round; stroke-linejoin: round; }
+    .c-brand .kpi-icon { background: rgba(225,79,75,0.1);  } .c-brand .kpi-icon svg { stroke: var(--brand); }
+    .c-amber .kpi-icon { background: rgba(212,130,10,0.1); } .c-amber .kpi-icon svg { stroke: var(--amber); }
+    .c-green .kpi-icon { background: rgba(27,158,90,0.1);  } .c-green .kpi-icon svg { stroke: var(--green); }
+    .c-blue  .kpi-icon { background: rgba(43,114,200,0.1); } .c-blue  .kpi-icon svg { stroke: var(--blue);  }
+
+    .kpi-val {
+      font-family: 'Orbitron', sans-serif; font-size: 38px; font-weight: 800;
+      line-height: 1; letter-spacing: -0.02em;
+      display: flex; align-items: baseline; gap: 5px;
+    }
+    .kpi-unit { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 400; color: var(--text-muted); }
+    .c-brand .kpi-val { color: var(--brand); }
+    .c-amber .kpi-val { color: var(--amber); }
+    .c-green .kpi-val { color: var(--green); }
+    .c-blue  .kpi-val { color: var(--blue);  }
+    .kpi-sub { font-size: 11px; color: var(--text-muted); font-weight: 300; margin-top: 8px; }
+
+    /* Charts */
+    .chart-row { display: grid; grid-template-columns: 1fr 360px; gap: 14px; margin-bottom: 20px; }
+    .chart-card { padding: 24px; }
+    .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .chart-title { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--text-secondary); }
+    .pill-badge {
+      font-size: 10px; font-weight: 700; padding: 4px 12px; border-radius: 100px;
+      background: rgba(225,79,75,0.08); color: var(--brand);
+      border: 1px solid rgba(225,79,75,0.20); letter-spacing: 0.05em;
+    }
+
+    .stage-legend { margin-top: 18px; display: flex; flex-direction: column; gap: 10px; }
+    .legend-row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; }
+    .legend-l { display: flex; align-items: center; gap: 8px; }
+    .legend-swatch { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+    .legend-name { color: var(--text-secondary); }
+    .legend-n { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 700; color: var(--text-primary); }
+    .legend-bar-track { height: 2px; background: rgba(0,0,0,0.07); border-radius: 2px; margin-top: 5px; }
+    .legend-bar-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
+
+    /* Leaderboard */
+    .leaderboard-card { padding: 28px; }
+    .lb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+    .lb-title { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 800; letter-spacing: 0.18em; text-transform: uppercase; color: var(--brand); }
+    .lb-sub { font-size: 11px; color: var(--text-muted); font-weight: 300; }
+    .member-list { display: flex; flex-direction: column; gap: 18px; }
+    .member-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 9px; }
+    .member-l { display: flex; align-items: center; gap: 10px; }
+    .rank-num { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; color: var(--text-muted); width: 18px; }
+    .avatar {
+      width: 32px; height: 32px; border-radius: 10px;
+      display: grid; place-items: center; font-size: 13px; font-weight: 700; flex-shrink: 0;
+      border: 1.5px solid rgba(255,255,255,0.85);
+    }
+    .av0 { background:rgba(225,79,75,0.12);  color:#C13532; }
+    .av1 { background:rgba(43,114,200,0.12); color:#2B72C8; }
+    .av2 { background:rgba(124,92,191,0.12); color:#7C5CBF; }
+    .av3 { background:rgba(27,158,90,0.12);  color:#1B9E5A; }
+    .av4 { background:rgba(212,130,10,0.12); color:#D4820A; }
+    .av5 { background:rgba(100,100,100,0.09);color:#6B6760; }
+    .member-name { font-size: 14px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
+    .member-cases { font-size: 11px; color: var(--text-muted); font-weight: 300; }
+    .member-r { display: flex; align-items: center; gap: 10px; }
+    .pts-num { font-family: 'Orbitron', sans-serif; font-size: 16px; font-weight: 800; }
+    .pts-unit { font-family: 'Orbitron', sans-serif; font-size: 9px; color: var(--text-muted); margin-left: 2px; }
+    .status-chip { font-size: 10px; font-weight: 700; padding: 3px 9px; border-radius: 100px; letter-spacing: 0.06em; text-transform: uppercase; }
+    .chip-danger  { background:rgba(225,79,75,0.10);  color:var(--brand);  border:1px solid rgba(225,79,75,0.22); }
+    .chip-warning { background:rgba(212,130,10,0.10); color:var(--amber);  border:1px solid rgba(212,130,10,0.22); }
+    .chip-ok      { background:rgba(27,158,90,0.10);  color:var(--green);  border:1px solid rgba(27,158,90,0.22); }
+    .prog-track { height: 5px; border-radius: 100px; background: rgba(0,0,0,0.07); overflow: hidden; }
+    .prog-fill { height: 100%; border-radius: 100px; transition: width 1s cubic-bezier(0.16,1,0.3,1); }
+    .fill-danger  { background: linear-gradient(90deg, #F28683, #E14F4B); }
+    .fill-warning { background: linear-gradient(90deg, #F0C060, #D4820A); }
+    .fill-ok      { background: linear-gradient(90deg, #6FDDA8, #1B9E5A); }
+
+    footer { text-align:center; font-size:11px; color:var(--text-muted); font-weight:300; letter-spacing:0.05em; padding-top:28px; border-top:1px solid rgba(0,0,0,0.07); margin-top:8px; }
+
+    @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
+    .card { animation: fadeUp 0.45s ease both; }
+    @media(max-width:920px){.chart-row{grid-template-columns:1fr}}
+  </style>
 </head>
-<body class="p-4 md:p-8">
-    <!-- Header -->
-    <nav class="flex justify-between items-center mb-10">
-        <h1 class="text-3xl font-bold brand-text tracking-tighter italic">IM PERFORMANCE HUB</h1>
-        <div class="px-4 py-2 glass-card text-sm font-medium">
-            Status: <span class="text-green-500">● Live Connection</span>
-        </div>
-    </nav>
+<body>
+<div class="layout">
 
-    <!-- Top Stats -->
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <div class="glass-card p-6 border-l-8 border-[#E14f4B]">
-            <p class="text-gray-500 text-sm mb-1">團隊總產值指數</p>
-            <h2 id="totalIndex" class="text-4xl font-bold tech-font brand-text">0</h2>
-        </div>
-        <div class="glass-card p-6">
-            <p class="text-gray-500 text-sm mb-1">執行中案件總數</p>
-            <h2 id="totalExecuting" class="text-4xl font-bold tech-font text-gray-800">0</h2>
-        </div>
-        <div class="glass-card p-6">
-            <p class="text-gray-500 text-sm mb-1">平均每人負載</p>
-            <h2 id="avgLoading" class="text-4xl font-bold tech-font text-gray-800">0</h2>
-        </div>
+  <nav>
+    <div class="logo">
+      <div class="logo-mark">
+        <svg viewBox="0 0 24 24"><polygon points="12 2 19 8 12 22 5 8"/><line x1="5" y1="8" x2="19" y2="8"/></svg>
+      </div>
+      <div>
+        <div class="logo-text">IM <em>CAPACITY</em> · SIGNAL</div>
+        <div id="lastUpdated">正在連線...</div>
+      </div>
     </div>
 
-    <!-- Charts -->
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
-        <div class="glass-card p-6">
-            <h3 class="text-lg font-bold mb-4 border-b pb-2">IM 個人總量能分佈 (總產值)</h3>
-            <canvas id="memberChart"></canvas>
-        </div>
-        <div class="glass-card p-6">
-            <h3 class="text-lg font-bold mb-4 border-b pb-2">專案階段佔比</h3>
-            <canvas id="stageChart"></canvas>
-        </div>
+    <div class="nav-filters" id="filterGroup">
+      <button class="nav-filter-btn active" data-filter="all">全部</button>
+      <button class="nav-filter-btn" data-filter="week">本週</button>
+      <button class="nav-filter-btn" data-filter="month">本月</button>
+      <button class="nav-filter-btn" data-filter="quarter">本季</button>
     </div>
 
-    <!-- Member Details List -->
-    <div class="glass-card p-6 overflow-hidden">
-        <h3 class="text-lg font-bold mb-6 italic brand-text tracking-widest">IM CAPACITY LEADERBOARD</h3>
-        <div id="memberList" class="space-y-4">
-            <!-- Loading Bars will be injected here -->
-        </div>
+    <div class="live-badge"><span class="live-dot"></span>已連線</div>
+  </nav>
+
+  <div class="kpi-grid">
+    <div class="card kpi-card c-brand primary-accent">
+      <div class="kpi-label">團隊總產值指數</div>
+      <div class="kpi-val"><span id="kpiTotal">—</span><span class="kpi-unit">PTS</span></div>
     </div>
+    <div class="card kpi-card c-amber">
+      <div class="kpi-label">執行中案件</div>
+      <div class="kpi-val"><span id="kpiExecuting">—</span><span class="kpi-unit">件</span></div>
+    </div>
+    <div class="card kpi-card c-green">
+      <div class="kpi-label">平均每人負載</div>
+      <div class="kpi-val"><span id="kpiAvg">—</span><span class="kpi-unit">PTS</span></div>
+    </div>
+    <div class="card kpi-card c-blue">
+      <div class="kpi-label">總案件數</div>
+      <div class="kpi-val"><span id="kpiCount">—</span><span class="kpi-unit">件</span></div>
+    </div>
+  </div>
 
-    <script>
-        // 抓取 GitHub 上的 data.json
-        fetch('data.json?v=' + Date.now()) // 加一個時間戳記，騙過瀏覽器快取
-            .then(res => res.json())
-            .then(data => {
-                processDashboard(data);
-            });
+  <div class="chart-row">
+    <div class="card chart-card">
+      <div class="chart-header">
+        <span class="chart-title">個人產值指數分佈</span>
+        <span class="pill-badge" id="memberBadge">— members</span>
+      </div>
+      <canvas id="memberChart" height="200"></canvas>
+    </div>
+    <div class="card chart-card">
+      <div class="chart-header">
+        <span class="chart-title">專案階段佔比</span>
+        <span class="pill-badge" id="stageBadge">— projects</span>
+      </div>
+      <div style="max-width:170px;margin:0 auto;"><canvas id="stageChart"></canvas></div>
+      <div class="stage-legend" id="stageLegend"></div>
+    </div>
+  </div>
 
-        function processDashboard(data) {
-            let memberData = {};
-            let totalIndex = 0;
-            let stages = {};
-            let executingCount = 0;
+  <div class="card leaderboard-card">
+    <div class="lb-header">
+      <span class="lb-title">IM CAPACITY ALLOCATION</span>
+      <span class="lb-sub">警示閾值：800 PTS</span>
+    </div>
+    <div class="member-list" id="memberList"></div>
+  </div>
 
-            data.forEach(item => {
-                const name = item["IM PIC"];
-                const score = parseFloat(item["產值指數"]) || 0;
-                const status = item["狀態"];
+  <footer>
+    IM Capacity · Signal &nbsp;·&nbsp; Google Sheets → GAS → GitHub → Cloudflare Pages
+  </footer>
+</div>
 
-                totalIndex += score;
-                if(status === "Executing") executingCount++;
+<script>
+  // 核心對應標籤 (需與 Google Sheet 標題一致)
+  const KEYS = {
+    NAME: "IM PIC",
+    STATUS: "狀態",
+    SCORE: "產值指數",
+    DATE: "最新更新"
+  };
 
-                // 統計個人資料
-                if(!memberData[name]) memberData[name] = { score: 0, count: 0 };
-                memberData[name].score += score;
-                memberData[name].count += 1;
+  const STAGE_COLORS = {
+    'Executing':'#E14F4B','Contacting':'#D4820A',
+    'Proposed':'#2B72C8','Brief':'#7C5CBF',
+    'Closed':'#1B9E5A','Lost':'#C0BBB4'
+  };
+  const STAGE_ORDER = ['Executing','Contacting','Proposed','Brief','Closed','Lost'];
+  const PALETTE = ['#E14F4B','#2B72C8','#7C5CBF','#1B9E5A','#D4820A','#888888'];
+  const THRESHOLD = 800;
 
-                // 統計階段
-                stages[status] = (stages[status] || 0) + 1;
-            });
+  let rawData=[], currentFilter='all', mChart=null, sChart=null;
 
-            // 更新面板數字
-            document.getElementById('totalIndex').innerText = Math.round(totalIndex);
-            document.getElementById('totalExecuting').innerText = executingCount;
-            document.getElementById('avgLoading').innerText = Math.round(totalIndex / Object.keys(memberData).length);
+  // 過濾邏輯
+  function filterData(data) {
+    if (currentFilter==='all') return data;
+    const now = new Date();
+    return data.filter(item => {
+      const dStr = item[KEYS.DATE] || item['需求時間'];
+      const d = new Date(dStr);
+      if (isNaN(d)) return false;
+      if (currentFilter==='week') { const w=new Date(now); w.setDate(now.getDate()-7); return d>=w; }
+      if (currentFilter==='month') return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();
+      if (currentFilter==='quarter') { const q=Math.floor(now.getMonth()/3); return d.getFullYear()===now.getFullYear()&&Math.floor(d.getMonth()/3)===q; }
+      return true;
+    });
+  }
 
-            // 1. 成員長條圖
-            const ctx1 = document.getElementById('memberChart').getContext('2d');
-            new Chart(ctx1, {
-                type: 'bar',
-                data: {
-                    labels: Object.keys(memberData),
-                    datasets: [{
-                        label: '產值指數',
-                        data: Object.values(memberData).map(m => m.score),
-                        backgroundColor: '#E14f4B'
-                    }]
-                },
-                options: { borderRadius: 10 }
-            });
+  // 數字跑動動畫
+  function countUp(el,target,dur=750) {
+    const from = parseFloat(el.textContent.replace(/,/g,'')) || 0;
+    const s = performance.now();
+    function tick(t){
+      const p = Math.min((t-s)/dur,1), e=1-Math.pow(1-p,3);
+      const val = Math.round(from + (target-from)*e);
+      el.textContent = val.toLocaleString();
+      if(p<1) requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+  }
 
-            // 2. 階段圓餅圖
-            const ctx2 = document.getElementById('stageChart').getContext('2d');
-            new Chart(ctx2, {
-                type: 'doughnut',
-                data: {
-                    labels: Object.keys(stages),
-                    datasets: [{
-                        data: Object.values(stages),
-                        backgroundColor: ['#E14f4B', '#f59e0b', '#3b82f6', '#10b981', '#6b7280']
-                    }]
-                },
-                options: { cutout: '70%' }
-            });
+  // 渲染核心
+  function render(data){
+    const members={}, stages={};
+    let total=0, exCount=0;
 
-            // 3. 戰力排行細節
-            const listContainer = document.getElementById('memberList');
-            Object.entries(memberData).sort((a,b) => b[1].score - a[1].score).forEach(([name, val]) => {
-                const percent = Math.min((val.score / 600) * 100, 100); // 假設上限 600 分
-                const colorClass = percent > 85 ? 'bg-red-600' : (percent > 60 ? 'bg-yellow-500' : 'bg-green-500');
-                
-                listContainer.innerHTML += `
-                    <div class="mb-4">
-                        <div class="flex justify-between mb-1">
-                            <span class="font-bold">${name}</span>
-                            <span class="tech-font text-sm font-bold ${percent > 85 ? 'text-red-600' : ''}">${Math.round(val.score)} PTs</span>
-                        </div>
-                        <div class="w-full bg-gray-200 rounded-full h-2.5">
-                            <div class="h-2.5 rounded-full ${colorClass}" style="width: ${percent}%"></div>
-                        </div>
-                    </div>
-                `;
-            });
+    data.forEach(item => {
+      const n = item[KEYS.NAME] || 'Unknown';
+      const s = parseFloat(item[KEYS.SCORE]) || 0;
+      const st = item[KEYS.STATUS] || 'Other';
+      
+      total += s;
+      if(st === 'Executing') exCount++;
+      if(!members[n]) members[n] = {score:0, count:0};
+      members[n].score += s;
+      members[n].count++;
+      stages[st] = (stages[st] || 0) + 1;
+    });
+
+    const mCount = Object.keys(members).length;
+    const avg = mCount ? Math.round(total/mCount) : 0;
+
+    countUp(document.getElementById('kpiTotal'), Math.round(total));
+    countUp(document.getElementById('kpiExecuting'), exCount);
+    countUp(document.getElementById('kpiAvg'), avg);
+    countUp(document.getElementById('kpiCount'), data.length);
+    document.getElementById('memberBadge').textContent = mCount + ' members';
+    document.getElementById('stageBadge').textContent = data.length + ' projects';
+
+    // 個人產值 Bar Chart
+    const sorted = Object.entries(members).sort((a,b) => b[1].score - a[1].score);
+    const labels = sorted.map(([n]) => n);
+    const vals = sorted.map(([,v]) => Math.round(v.score));
+    const bCols = labels.map((_,i) => PALETTE[i % PALETTE.length]);
+    
+    if(mChart) mChart.destroy();
+    mChart = new Chart(document.getElementById('memberChart').getContext('2d'), {
+      type: 'bar',
+      data: { labels, datasets:[{ label:'產值指數', data:vals, backgroundColor: bCols.map(c=>c+'28'), borderColor: bCols, borderWidth:2, borderRadius:9 }]},
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' } }
         }
-    </script>
+      }
+    });
+
+    // 專案階段 Doughnut
+    const sL = STAGE_ORDER.filter(s => stages[s]);
+    const sV = sL.map(s => stages[s]);
+    const sC = sL.map(s => STAGE_COLORS[s]);
+    if(sChart) sChart.destroy();
+    sChart = new Chart(document.getElementById('stageChart').getContext('2d'), {
+      type: 'doughnut',
+      data: { labels: sL, datasets: [{ data: sV, backgroundColor: sC.map(c=>c+'33'), borderColor: sC, borderWidth: 2.5 }]},
+      options: { cutout: '72%', plugins: { legend: { display: false } } }
+    });
+
+    // 階段 Legend 渲染
+    const totalS = sV.reduce((a,b) => a+b, 0);
+    document.getElementById('stageLegend').innerHTML = sL.map((s,i) => `
+      <div class="legend-row">
+        <div class="legend-l"><div class="legend-swatch" style="background:${sC[i]}"></div><span class="legend-name">${s}</span></div>
+        <span class="legend-n">${sV[i]}</span>
+      </div>
+      <div class="legend-bar-track"><div class="legend-bar-fill" style="background:${sC[i]}99;width:${Math.round(sV[i]/totalS*100)}%"></div></div>
+    `).join('');
+
+    // 排行榜細節
+    const listEl = document.getElementById('memberList');
+    listEl.innerHTML = '';
+    sorted.forEach(([name, val], i) => {
+      const pct = Math.min((val.score/THRESHOLD)*100, 100);
+      let cls = pct > 85 ? 'danger' : (pct > 55 ? 'warning' : 'ok');
+      const row = document.createElement('div');
+      row.innerHTML = `
+        <div class="member-meta" style="margin-top:10px">
+          <div class="member-l">
+            <div class="avatar av${i%6}">${name[0]}</div>
+            <div><div class="member-name">${name}</div><div class="member-cases">${val.count} 個專案</div></div>
+          </div>
+          <div class="member-r">
+            <div><span class="pts-num" style="color:${PALETTE[i%6]}">${Math.round(val.score)}</span><span class="pts-unit">PTS</span></div>
+            <span class="status-chip chip-${cls}">${cls === 'danger' ? 'OVERLOAD' : (cls === 'warning' ? 'HIGH' : 'HEALTHY')}</span>
+          </div>
+        </div>
+        <div class="prog-track"><div class="prog-fill fill-${cls}" style="width:${pct}%"></div></div>
+      `;
+      listEl.appendChild(row);
+    });
+  }
+
+  // 監聽 Filter
+  document.getElementById('filterGroup').addEventListener('click', e => {
+    const btn = e.target.closest('.nav-filter-btn');
+    if(!btn) return;
+    document.querySelectorAll('.nav-filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    currentFilter = btn.dataset.filter;
+    render(filterData(rawData));
+  });
+
+  // 抓取數據
+  fetch('data.json?v=' + Date.now())
+    .then(r => r.json())
+    .then(data => {
+      rawData = data;
+      const dates = data.map(d => new Date(d[KEYS.DATE])).filter(d => !isNaN(d));
+      if(dates.length){
+        const latest = new Date(Math.max(...dates));
+        document.getElementById('lastUpdated').textContent = '更新於 ' + latest.toLocaleString('zh-TW', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+      }
+      render(data);
+    })
+    .catch(e => {
+      console.error(e);
+      document.getElementById('lastUpdated').textContent = '無法連接數據源';
+    });
+</script>
 </body>
 </html>
