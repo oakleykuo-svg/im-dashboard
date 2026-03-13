@@ -3,191 +3,148 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IM Performance | Enterprise Dashboard</title>
+    <title>IM Performance Hub</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;800&display=swap" rel="stylesheet">
     <style>
-        :root { --brand: #E14f4B; }
-        body { 
-            font-family: 'Inter', sans-serif; 
-            background: #f9fafb;
-            background-image: radial-gradient(#e5e7eb 1px, transparent 1px);
-            background-size: 24px 24px;
-        }
-        .sidebar { background: #111827; }
-        .glass-header {
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&family=Noto+Sans+TC:wght@300;500;700&display=swap');
+        body { font-family: 'Noto Sans TC', sans-serif; background: #fdfdfd; }
+        .tech-font { font-family: 'Orbitron', sans-serif; }
+        .glass-card {
             background: rgba(255, 255, 255, 0.8);
-            backdrop-filter: saturate(180%) blur(20px);
-            border-bottom: 1px solid #e5e7eb;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(225, 79, 75, 0.1);
+            box-shadow: 0 8px 32px rgba(0,0,0,0.05);
+            border-radius: 20px;
         }
-        .stat-card {
-            background: white;
-            border: 1px solid #f3f4f6;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            border-radius: 16px;
-            transition: all 0.2s ease;
-        }
-        .stat-card:hover { transform: translateY(-2px); box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1); }
-        .progress-bg { background: #f3f4f6; border-radius: 999px; overflow: hidden; height: 8px; }
-        .progress-fill { border-radius: 999px; transition: width 1s ease-out; }
-        .brand-pill { background: #E14f4B; color: white; border-radius: 8px; padding: 4px 12px; font-weight: 800; }
-        .dot { height: 10px; width: 10px; border-radius: 50%; display: inline-block; }
+        .brand-text { color: #E14f4B; }
+        .brand-bg { background-color: #E14f4B; }
     </style>
 </head>
-<body>
-    <div class="flex min-h-screen">
-        <!-- Sidebar (Visual Decor only) -->
-        <aside class="hidden lg:flex flex-col w-64 sidebar text-white p-6 sticky top-0 h-screen">
-            <div class="brand-pill text-center mb-10 text-xl tracking-tighter">IM HUB</div>
-            <nav class="space-y-4">
-                <div class="flex items-center gap-3 text-gray-400 font-medium p-2 bg-gray-800/50 rounded-lg text-white">
-                    <div class="w-2 h-2 rounded-full bg-[#E14f4B]"></div> Dashboard
-                </div>
-                <div class="flex items-center gap-3 text-gray-400 hover:text-white p-2 transition-colors cursor-pointer">Project List</div>
-                <div class="flex items-center gap-3 text-gray-400 hover:text-white p-2 transition-colors cursor-pointer">Team Capacity</div>
-            </nav>
-            <div class="mt-auto p-4 bg-gray-800/40 rounded-2xl text-xs text-gray-500">
-                Data synced from Google Sheets. System V3.0
-            </div>
-        </aside>
+<body class="p-4 md:p-8">
+    <!-- Header -->
+    <nav class="flex justify-between items-center mb-10">
+        <h1 class="text-3xl font-bold brand-text tracking-tighter italic">IM PERFORMANCE HUB</h1>
+        <div class="px-4 py-2 glass-card text-sm font-medium">
+            Status: <span class="text-green-500">● Live Connection</span>
+        </div>
+    </nav>
 
-        <!-- Main Content -->
-        <div class="flex-1">
-            <header class="glass-header sticky top-0 z-10 px-8 py-4 flex justify-between items-center">
-                <div class="flex items-center gap-4">
-                    <h2 class="text-xl font-bold tracking-tight text-gray-900">Resource Monitoring</h2>
-                    <span class="text-xs font-bold text-gray-400 bg-gray-100 px-2 py-1 rounded tracking-widest uppercase">Real-time</span>
-                </div>
-                <div class="flex items-center gap-4 text-sm font-medium text-gray-500">
-                    <span class="flex items-center gap-1.5"><span class="dot bg-green-500"></span> Active</span>
-                    <button onclick="location.reload()" class="bg-gray-900 text-white px-4 py-2 rounded-xl hover:bg-[#E14f4B] transition-all">Refresh</button>
-                </div>
-            </header>
+    <!-- Top Stats -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+        <div class="glass-card p-6 border-l-8 border-[#E14f4B]">
+            <p class="text-gray-500 text-sm mb-1">團隊總產值指數</p>
+            <h2 id="totalIndex" class="text-4xl font-bold tech-font brand-text">0</h2>
+        </div>
+        <div class="glass-card p-6">
+            <p class="text-gray-500 text-sm mb-1">執行中案件總數</p>
+            <h2 id="totalExecuting" class="text-4xl font-bold tech-font text-gray-800">0</h2>
+        </div>
+        <div class="glass-card p-6">
+            <p class="text-gray-500 text-sm mb-1">平均每人負載</p>
+            <h2 id="avgLoading" class="text-4xl font-bold tech-font text-gray-800">0</h2>
+        </div>
+    </div>
 
-            <main class="p-8 lg:p-12 max-w-6xl mx-auto">
-                <!-- KPI Section -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                    <div class="stat-card p-6">
-                        <p class="text-sm font-semibold text-gray-400 mb-1">Total Capacity Index</p>
-                        <div class="flex items-baseline gap-2">
-                            <span id="totalIndex" class="text-4xl font-extrabold text-gray-900 tracking-tighter">0</span>
-                            <span class="text-xs font-bold text-[#E14f4B] bg-[#E14f4B]/10 px-2 py-0.5 rounded">+2.4%</span>
-                        </div>
-                    </div>
-                    <div class="stat-card p-6">
-                        <p class="text-sm font-semibold text-gray-400 mb-1">Active Executing</p>
-                        <div id="totalExecuting" class="text-4xl font-extrabold text-gray-900 tracking-tighter">0</div>
-                    </div>
-                    <div class="stat-card p-6">
-                        <p class="text-sm font-semibold text-gray-400 mb-1">Average Resource Load</p>
-                        <div id="avgLoading" class="text-4xl font-extrabold text-gray-900 tracking-tighter">0</div>
-                    </div>
-                </div>
+    <!-- Charts -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 mb-10">
+        <div class="glass-card p-6">
+            <h3 class="text-lg font-bold mb-4 border-b pb-2">IM 個人總量能分佈 (總產值)</h3>
+            <canvas id="memberChart"></canvas>
+        </div>
+        <div class="glass-card p-6">
+            <h3 class="text-lg font-bold mb-4 border-b pb-2">專案階段佔比</h3>
+            <canvas id="stageChart"></canvas>
+        </div>
+    </div>
 
-                <!-- Main Layout -->
-                <div class="grid grid-cols-1 lg:grid-cols-5 gap-10">
-                    <!-- Leaderboard -->
-                    <div class="lg:col-span-3 space-y-6">
-                        <div class="flex items-center justify-between mb-2">
-                            <h3 class="text-lg font-extrabold text-gray-800 italic">IM CAPACITY ANALYSIS</h3>
-                            <span class="text-xs font-bold text-gray-400">THRESHOLD: 800</span>
-                        </div>
-                        <div id="memberList" class="space-y-6">
-                            <!-- Cards will be injected -->
-                            <div class="text-gray-300 animate-pulse">Initializing Interface...</div>
-                        </div>
-                    </div>
-
-                    <!-- Side Charts -->
-                    <div class="lg:col-span-2 space-y-8">
-                        <div class="stat-card p-8">
-                            <h3 class="text-sm font-bold text-gray-400 uppercase tracking-widest mb-6 text-center">Project Status</h3>
-                            <canvas id="stageChart" height="240"></canvas>
-                        </div>
-                        <div class="p-8 rounded-3xl bg-gray-900 text-white relative overflow-hidden shadow-2xl">
-                            <div class="absolute -right-4 -top-4 w-24 h-24 bg-[#E14f4B] opacity-20 blur-3xl"></div>
-                            <h4 class="text-xs font-bold uppercase tracking-widest text-[#E14f4B] mb-4">Strategic Insight</h4>
-                            <p id="insightText" class="text-sm font-light leading-relaxed opacity-90">Scanning resource distribution...</p>
-                        </div>
-                    </div>
-                </div>
-            </main>
+    <!-- Member Details List -->
+    <div class="glass-card p-6 overflow-hidden">
+        <h3 class="text-lg font-bold mb-6 italic brand-text tracking-widest">IM CAPACITY LEADERBOARD</h3>
+        <div id="memberList" class="space-y-4">
+            <!-- Loading Bars will be injected here -->
         </div>
     </div>
 
     <script>
-        const DATA_URL = 'data.json?v=' + Date.now();
-
-        fetch(DATA_URL).then(res => res.json()).then(data => processDashboard(data));
+        // 抓取 GitHub 上的 data.json
+        fetch('data.json')
+            .then(res => res.json())
+            .then(data => {
+                processDashboard(data);
+            });
 
         function processDashboard(data) {
-            let memberData = {}, totalIndex = 0, stages = {}, execCount = 0;
+            let memberData = {};
+            let totalIndex = 0;
+            let stages = {};
+            let executingCount = 0;
 
             data.forEach(item => {
-                const cleanItem = {};
-                Object.keys(item).forEach(k => cleanItem[k.trim()] = item[k]);
-                const name = cleanItem["IM PIC"] || "User";
-                const score = parseFloat(cleanItem["產值指數"]) || 0;
-                const status = cleanItem["狀態"];
+                const name = item["IM PIC"];
+                const score = parseFloat(item["產值指數"]) || 0;
+                const status = item["狀態"];
 
                 totalIndex += score;
-                if(status === "Executing") execCount++;
+                if(status === "Executing") executingCount++;
+
+                // 統計個人資料
                 if(!memberData[name]) memberData[name] = { score: 0, count: 0 };
                 memberData[name].score += score;
                 memberData[name].count += 1;
+
+                // 統計階段
                 stages[status] = (stages[status] || 0) + 1;
             });
 
-            const mCount = Object.keys(memberData).length;
+            // 更新面板數字
             document.getElementById('totalIndex').innerText = Math.round(totalIndex);
-            document.getElementById('totalExecuting').innerText = execCount;
-            document.getElementById('avgLoading').innerText = Math.round(totalIndex / mCount);
-            document.getElementById('insightText').innerText = totalIndex / mCount > 600 ? 
-                "Current team bandwidth is critical. Prioritize high-value cases or consider temporary load rebalancing." : 
-                "Team resources are healthy. Ready for new project briefs and execution phases.";
+            document.getElementById('totalExecuting').innerText = executingCount;
+            document.getElementById('avgLoading').innerText = Math.round(totalIndex / Object.keys(memberData).length);
 
-            // Stage Chart
-            new Chart(document.getElementById('stageChart'), {
+            // 1. 成員長條圖
+            const ctx1 = document.getElementById('memberChart').getContext('2d');
+            new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: Object.keys(memberData),
+                    datasets: [{
+                        label: '產值指數',
+                        data: Object.values(memberData).map(m => m.score),
+                        backgroundColor: '#E14f4B'
+                    }]
+                },
+                options: { borderRadius: 10 }
+            });
+
+            // 2. 階段圓餅圖
+            const ctx2 = document.getElementById('stageChart').getContext('2d');
+            new Chart(ctx2, {
                 type: 'doughnut',
                 data: {
                     labels: Object.keys(stages),
                     datasets: [{
                         data: Object.values(stages),
-                        backgroundColor: ['#E14f4B', '#111827', '#4b5563', '#9ca3af', '#e5e7eb'],
-                        hoverOffset: 4, borderWidth: 0
+                        backgroundColor: ['#E14f4B', '#f59e0b', '#3b82f6', '#10b981', '#6b7280']
                     }]
                 },
-                options: { cutout: '80%', plugins: { legend: { position: 'bottom', labels: { boxWidth: 10, font: { size: 10, weight: 'bold' } } } } }
+                options: { cutout: '70%' }
             });
 
-            // Member List
-            const list = document.getElementById('memberList');
-            list.innerHTML = '';
+            // 3. 戰力排行細節
+            const listContainer = document.getElementById('memberList');
             Object.entries(memberData).sort((a,b) => b[1].score - a[1].score).forEach(([name, val]) => {
-                const ratio = Math.min((val.score / 800) * 100, 100);
-                let color = "#E14f4B";
-                if(ratio < 40) color = "#10b981"; // Healthy Green
-                else if(ratio < 75) color = "#6366f1"; // Active Blue
-
-                list.innerHTML += `
-                    <div class="stat-card p-6 bg-white border-l-4" style="border-left-color: ${color}">
-                        <div class="flex justify-between items-end mb-4">
-                            <div>
-                                <span class="text-xs font-black tracking-widest text-gray-400 uppercase">Resource Load</span>
-                                <h4 class="text-xl font-extrabold text-gray-900 mt-1">${name}</h4>
-                            </div>
-                            <div class="text-right">
-                                <span class="text-2xl font-black tracking-tighter" style="color: ${color}">${Math.round(val.score)}</span>
-                                <span class="text-[10px] font-bold text-gray-300 ml-1">/ 800 PTS</span>
-                            </div>
+                const percent = Math.min((val.score / 600) * 100, 100); // 假設上限 600 分
+                const colorClass = percent > 85 ? 'bg-red-600' : (percent > 60 ? 'bg-yellow-500' : 'bg-green-500');
+                
+                listContainer.innerHTML += `
+                    <div class="mb-4">
+                        <div class="flex justify-between mb-1">
+                            <span class="font-bold">${name}</span>
+                            <span class="tech-font text-sm font-bold ${percent > 85 ? 'text-red-600' : ''}">${Math.round(val.score)} PTs</span>
                         </div>
-                        <div class="progress-bg">
-                            <div class="progress-fill h-full" style="width: ${ratio}%; background-color: ${color}"></div>
-                        </div>
-                        <div class="flex justify-between mt-4">
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">${val.count} Active Tasks</span>
-                            <span class="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Efficiency: 98%</span>
+                        <div class="w-full bg-gray-200 rounded-full h-2.5">
+                            <div class="h-2.5 rounded-full ${colorClass}" style="width: ${percent}%"></div>
                         </div>
                     </div>
                 `;
