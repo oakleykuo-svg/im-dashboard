@@ -65,90 +65,40 @@
 
     /* NAV */
     nav {
-      display: flex; align-items: center;
-      justify-content: space-between; gap: 10px;
-      padding: 8px 12px 8px 10px;
-      margin-bottom: 16px;
-      background: var(--glass-strong);
-      backdrop-filter: blur(28px) saturate(1.8);
-      -webkit-backdrop-filter: blur(28px) saturate(1.8);
-      border: 1px solid var(--glass-border);
-      border-radius: 100px;
-      box-shadow: var(--shadow);
-      flex-wrap: wrap;
-      animation: fadeUp 0.4s ease both;
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 8px 12px 8px 10px; margin-bottom: 16px;
+      background: var(--glass-strong); backdrop-filter: blur(28px) saturate(1.8);
+      border: 1px solid var(--glass-border); border-radius: 100px; box-shadow: var(--shadow);
+      flex-wrap: wrap; animation: fadeUp 0.4s ease both;
     }
     .logo { display: flex; align-items: center; gap: 10px; }
     .logo-mark {
       width: 32px; height: 32px; border-radius: 10px;
-      background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(16px) saturate(2);
-      -webkit-backdrop-filter: blur(16px) saturate(2);
-      border: 1.5px solid rgba(255,255,255,0.92);
-      box-shadow: 0 2px 14px rgba(225,79,75,0.14), inset 0 1px 1px rgba(255,255,255,0.85);
-      display: grid; place-items: center;
-      flex-shrink: 0; position: relative; overflow: hidden;
+      background: rgba(255,255,255,0.55); border: 1.5px solid rgba(255,255,255,0.92);
+      box-shadow: 0 2px 14px rgba(225,79,75,0.14); display: grid; place-items: center;
     }
-    .logo-mark svg { width: 15px; height: 15px; stroke: var(--brand); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; position: relative; z-index: 1; }
-    .logo-text { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; color: var(--text-primary); }
+    .logo-mark svg { width: 15px; height: 15px; stroke: var(--brand); fill: none; stroke-width: 2.2; }
+    .logo-text { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; }
     .logo-text em { color: var(--brand); font-style: normal; }
-    #lastUpdated { font-size: 10px; color: var(--text-muted); font-weight: 400; margin-top: 1px; }
+    #lastUpdated { font-size: 10px; color: var(--text-muted); font-weight: 400; }
 
     .nav-filters { display: flex; align-items: center; gap: 2px; }
-    .nav-filter-btn {
-      padding: 6px 14px; border-radius: 100px; border: none;
-      background: transparent; color: var(--text-secondary);
-      font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600;
-      cursor: pointer; transition: all 0.2s; white-space: nowrap;
-    }
+    .nav-filter-btn { padding: 6px 14px; border-radius: 100px; border: none; background: transparent; color: var(--text-secondary); font-size: 11px; font-weight: 600; cursor: pointer; transition: 0.2s; white-space: nowrap; }
     .nav-filter-btn:hover { color: var(--text-primary); background: rgba(0,0,0,0.04); }
-    .nav-filter-btn.active {
-      background: linear-gradient(135deg, #E14F4B, #C84040);
-      color: #fff; box-shadow: 0 2px 12px rgba(225,79,75,0.28);
-    }
+    .nav-filter-btn.active { background: linear-gradient(135deg, #E14F4B, #C84040); color: #fff; box-shadow: 0 2px 12px rgba(225,79,75,0.28); }
 
-    .live-badge {
-      display: flex; align-items: center; gap: 5px;
-      padding: 5px 10px; border-radius: 100px;
-      background: rgba(27,158,90,0.10); border: 1px solid rgba(27,158,90,0.20);
-      font-size: 10px; font-weight: 700; color: var(--green); white-space: nowrap;
-    }
-    .live-dot {
-      width: 5px; height: 5px; border-radius: 50%;
-      background: var(--green); box-shadow: 0 0 6px var(--green);
-      animation: blink 2s ease infinite;
-    }
+    .live-badge { display: flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 100px; background: rgba(27,158,90,0.10); border: 1px solid rgba(27,158,90,0.20); font-size: 10px; font-weight: 700; color: var(--green); }
+    .live-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--green); animation: blink 2s ease infinite; }
     @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.4} }
 
     /* KPIs */
     .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(180px,1fr)); gap: 12px; margin-bottom: 16px; }
-    .kpi-card { padding: 16px 18px 14px; position: relative; overflow: hidden; }
-    .kpi-card::before {
-      content: ''; position: absolute; top: 0; right: 0;
-      width: 100px; height: 100px; border-radius: 50%;
-      transform: translate(40%,-40%); opacity: 0.7;
-    }
-    .kpi-card.c-brand::before { background: radial-gradient(circle,rgba(225,79,75,0.13),transparent 70%); }
-    .kpi-card.c-amber::before { background: radial-gradient(circle,rgba(212,130,10,0.12),transparent 70%); }
-    .kpi-card.c-green::before { background: radial-gradient(circle,rgba(27,158,90,0.12),transparent 70%); }
-    .kpi-card.c-blue::before  { background: radial-gradient(circle,rgba(43,114,200,0.12),transparent 70%); }
-    .kpi-card.primary-accent  { border-top: 3px solid var(--brand); padding-top: 13px; }
-
-    .kpi-label {
-      display: flex; align-items: center; gap: 6px;
-      font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
-      color: var(--text-muted); margin-bottom: 8px;
-    }
-    .kpi-val {
-      font-family: 'Orbitron', sans-serif; font-size: 30px; font-weight: 800;
-      line-height: 1; letter-spacing: -0.02em;
-      display: flex; align-items: baseline; gap: 4px;
-    }
-    .kpi-unit { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 400; color: var(--text-muted); }
+    .kpi-card { padding: 16px 18px 14px; position: relative; overflow: hidden; border-top: 3px solid transparent; }
+    .kpi-card.primary-accent { border-top-color: var(--brand); }
+    .kpi-label { font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 8px; }
+    .kpi-val { font-family: 'Orbitron', sans-serif; font-size: 30px; font-weight: 800; line-height: 1; letter-spacing: -0.02em; display: flex; align-items: baseline; gap: 4px; }
+    .kpi-unit { font-size: 10px; font-weight: 400; color: var(--text-muted); }
     .c-brand .kpi-val { color: var(--brand); }
-    .c-amber .kpi-val { color: var(--amber); }
-    .c-green .kpi-val { color: var(--green); }
-    .c-blue  .kpi-val { color: var(--blue);  }
     .kpi-sub { font-size: 10px; color: var(--text-muted); font-weight: 400; margin-top: 6px; }
 
     /* Charts */
@@ -156,122 +106,78 @@
     .chart-card { padding: 16px 20px; }
     .chart-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
     .chart-title { font-size: 11px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--text-secondary); }
-    .pill-badge {
-      font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 100px;
-      background: rgba(225,79,75,0.08); color: var(--brand);
-      border: 1px solid rgba(225,79,75,0.20); letter-spacing: 0.05em;
-    }
+    .pill-badge { font-size: 9px; font-weight: 700; padding: 3px 8px; border-radius: 100px; background: rgba(225,79,75,0.08); color: var(--brand); border: 1px solid rgba(225,79,75,0.20); }
 
     .stage-legend { margin-top: 12px; display: flex; flex-direction: column; gap: 8px; }
     .legend-row { display: flex; align-items: center; justify-content: space-between; font-size: 10px; }
-    .legend-l { display: flex; align-items: center; gap: 6px; }
-    .legend-swatch { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    .legend-name { color: var(--text-secondary); font-weight: 500; }
-    .legend-n { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; color: var(--text-primary); }
-    .legend-bar-track { height: 2px; background: rgba(0,0,0,0.07); border-radius: 2px; margin-top: 3px; }
-    .legend-bar-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
+    .legend-swatch { width: 6px; height: 6px; border-radius: 50%; }
+    .legend-bar-track { height: 2px; background: rgba(0,0,0,0.07); margin-top: 3px; }
+    .legend-bar-fill { height: 100%; transition: width 1s ease; }
 
     /* Leaderboard */
     .leaderboard-card { padding: 16px 20px; }
     .lb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .lb-title { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); }
-    .lb-sub { font-size: 10px; color: var(--text-muted); font-weight: 400; }
-    
-    .member-list { 
-      display: flex; flex-direction: column; gap: 12px; 
-      max-height: 240px; overflow-y: auto; padding-right: 6px;
-    }
-    .member-list::-webkit-scrollbar { width: 4px; }
-    .member-list::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); border-radius: 10px; }
-    .member-list::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
-
+    .lb-title { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; text-transform: uppercase; color: var(--brand); }
+    .member-list { display: flex; flex-direction: column; gap: 12px; max-height: 350px; overflow-y: auto; padding-right: 6px; }
+    .member-row { margin-bottom: 12px; }
     .member-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
-    .member-l { display: flex; align-items: center; gap: 8px; }
-    .rank-num { font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; color: var(--text-muted); width: 14px; }
-    .avatar {
-      width: 26px; height: 26px; border-radius: 7px;
-      display: grid; place-items: center; font-size: 11px; font-weight: 700; flex-shrink: 0;
-      border: 1.5px solid rgba(255,255,255,0.85);
-    }
-    .av0 { background:rgba(225,79,75,0.12);  color:#C13532; }
-    .av1 { background:rgba(43,114,200,0.12); color:#2B72C8; }
-    .av2 { background:rgba(124,92,191,0.12); color:#7C5CBF; }
-    .av3 { background:rgba(27,158,90,0.12);  color:#1B9E5A; }
-    .av4 { background:rgba(212,130,10,0.12); color:#D4820A; }
-    .av5 { background:rgba(100,100,100,0.09);color:#6B6760; }
-    .member-name { font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
-    .member-cases { font-size: 9px; color: var(--text-muted); font-weight: 400; margin-top: 1px; }
-    .member-r { display: flex; align-items: center; gap: 8px; }
+    .avatar { width: 26px; height: 26px; border-radius: 7px; display: grid; place-items: center; font-size: 11px; font-weight: 700; }
+    .member-name { font-size: 12px; font-weight: 600; }
     .pts-num { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 800; }
-    .pts-unit { font-family: 'Orbitron', sans-serif; font-size: 8px; color: var(--text-muted); margin-left: 2px; }
-    .status-chip { font-size: 8px; font-weight: 700; padding: 3px 7px; border-radius: 100px; letter-spacing: 0.05em; text-transform: uppercase; }
-    .chip-danger  { background:rgba(225,79,75,0.10);  color:var(--brand);  border:1px solid rgba(225,79,75,0.22); }
-    .chip-warning { background:rgba(212,130,10,0.10); color:var(--amber);  border:1px solid rgba(212,130,10,0.22); }
-    .chip-ok      { background:rgba(27,158,90,0.10);  color:var(--green);  border:1px solid rgba(27,158,90,0.22); }
+    .status-chip { font-size: 8px; font-weight: 700; padding: 3px 7px; border-radius: 100px; text-transform: uppercase; }
+    .chip-danger { background:rgba(225,79,75,0.1); color:var(--brand); border:1px solid rgba(225,79,75,0.22); }
+    .chip-warning { background:rgba(212,130,10,0.1); color:var(--amber); border:1px solid rgba(212,130,10,0.22); }
+    .chip-ok { background:rgba(27,158,90,0.1); color:var(--green); border:1px solid rgba(27,158,90,0.22); }
     .prog-track { height: 4px; border-radius: 100px; background: rgba(0,0,0,0.07); overflow: hidden; }
-    .prog-fill { height: 100%; border-radius: 100px; transition: width 1s cubic-bezier(0.16,1,0.3,1); }
-    .fill-danger  { background: linear-gradient(90deg, #F28683, #E14F4B); }
+    .prog-fill { height: 100%; transition: width 1s ease; }
+    .fill-danger { background: linear-gradient(90deg, #F28683, #E14F4B); }
     .fill-warning { background: linear-gradient(90deg, #F0C060, #D4820A); }
-    .fill-ok      { background: linear-gradient(90deg, #6FDDA8, #1B9E5A); }
+    .fill-ok { background: linear-gradient(90deg, #6FDDA8, #1B9E5A); }
 
-    /* SIDEBAR */
-    .sidebar-backdrop {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(3px);
-      z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
-    }
+    /* 【還原】完整側邊欄樣式 */
+    .sidebar-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(3px); z-index: 99; opacity: 0; pointer-events: none; transition: 0.3s; }
     .sidebar-backdrop.show { opacity: 1; pointer-events: auto; }
-    .sidebar {
-      position: fixed; top: 0; right: -400px; width: 100%; max-width: 360px; height: 100vh;
-      background: rgba(255,255,255,0.75); backdrop-filter: blur(30px) saturate(1.8);
-      -webkit-backdrop-filter: blur(30px) saturate(1.8);
-      border-left: 1px solid var(--glass-border); box-shadow: var(--shadow-md);
-      z-index: 100; transition: right 0.4s cubic-bezier(0.16,1,0.3,1);
-      display: flex; flex-direction: column;
-    }
+    .sidebar { position: fixed; top: 0; right: -400px; width: 100%; max-width: 360px; height: 100vh; background: rgba(255,255,255,0.8); backdrop-filter: blur(30px) saturate(1.8); -webkit-backdrop-filter: blur(30px) saturate(1.8); border-left: 1px solid var(--glass-border); box-shadow: var(--shadow-md); z-index: 100; transition: 0.4s cubic-bezier(0.16,1,0.3,1); display: flex; flex-direction: column; }
     .sidebar.open { right: 0; }
     .sidebar-header { padding: 20px 24px; border-bottom: 1px solid rgba(0,0,0,0.06); display: flex; justify-content: space-between; align-items: center; }
     .sidebar-title { font-size: 12px; font-weight: 800; color: var(--text-primary); letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; }
-    .close-btn { background: rgba(0,0,0,0.04); border: none; width: 28px; height: 28px; border-radius: 50%; display: grid; place-items: center; cursor: pointer; }
-    .sidebar-content { padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; }
-    .info-col { background: rgba(255, 255, 255, 0.45); padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.7); }
-    .info-col-title { font-size: 10px; font-weight: 700; color: var(--text-secondary); margin-bottom: 6px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 5px; }
-    .info-text { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
-    .info-list li { font-size: 10px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 5px; display: flex; align-items: flex-start; gap: 6px; }
-    .info-dot { width: 6px; height: 6px; border-radius: 50%; margin-top: 4px; flex-shrink: 0; }
-    .info-footer-quote { margin-top: 12px; padding: 10px 14px; background: rgba(225, 79, 75, 0.04); border-left: 3px solid var(--brand); border-radius: 0 6px 6px 0; font-size: 10px; color: var(--text-primary); font-weight: 500; }
+    .close-btn { background: rgba(0,0,0,0.04); border: none; width: 28px; height: 28px; border-radius: 50%; cursor: pointer; display: grid; place-items: center; }
+    .sidebar-content { padding: 20px 24px; overflow-y: auto; display: flex; flex-direction: column; gap: 16px; }
+    .info-col { background: rgba(255, 255, 255, 0.5); padding: 16px; border-radius: 12px; border: 1px solid rgba(255, 255, 255, 0.8); }
+    .info-col-title { font-size: 11px; font-weight: 700; color: var(--text-secondary); margin-bottom: 10px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 5px; text-transform: uppercase; }
+    .info-list { list-style: none; }
+    .info-list li { font-size: 11px; color: var(--text-secondary); line-height: 1.6; margin-bottom: 8px; display: flex; align-items: flex-start; gap: 8px; }
+    .info-list li b { color: var(--text-primary); font-weight: 700; }
+    .info-dot { width: 7px; height: 7px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
+    .dot-g { background: var(--green); } .dot-y { background: #E5B440; } .dot-o { background: var(--amber); } .dot-r { background: var(--brand); }
+    .text-highlight { color: var(--brand); font-weight: 800; }
+    .info-text { font-size: 11px; color: var(--text-secondary); line-height: 1.6; }
+    .info-footer-quote { margin-top: 15px; padding: 12px 16px; background: rgba(225, 79, 75, 0.05); border-left: 4px solid var(--brand); border-radius: 0 8px 8px 0; font-size: 11px; color: var(--text-primary); font-weight: 600; line-height: 1.6; }
 
-    footer { text-align:center; font-size:9px; color:var(--text-muted); font-weight:400; letter-spacing:0.05em; padding-top:16px; border-top:1px solid rgba(0,0,0,0.05); margin-top:16px; }
+    footer { text-align:center; font-size:9px; color:var(--text-muted); padding: 16px; }
 
     @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
-    .card { animation: fadeUp 0.45s ease both; }
     @media(max-width:920px){.chart-row{grid-template-columns:1fr}}
   </style>
 </head>
 <body>
 <div class="layout">
-
   <nav>
     <div class="logo">
-      <div class="logo-mark">
-        <svg viewBox="0 0 24 24"><polygon points="12 2 19 8 12 22 5 8"/><line x1="5" y1="8" x2="19" y2="8"/></svg>
-      </div>
+      <div class="logo-mark"><svg viewBox="0 0 24 24"><polygon points="12 2 19 8 12 22 5 8"/><line x1="5" y1="8" x2="19" y2="8"/></svg></div>
       <div>
         <div class="logo-text">IM <em>CAPACITY</em> · SIGNAL</div>
         <div id="lastUpdated">正在連線...</div>
       </div>
     </div>
-
     <div class="nav-filters" id="filterGroup">
       <button class="nav-filter-btn active" data-filter="all">全部</button>
       <button class="nav-filter-btn" data-filter="week">本週</button>
       <button class="nav-filter-btn" data-filter="month">本月</button>
       <button class="nav-filter-btn" data-filter="quarter">本季</button>
     </div>
-
     <div style="display: flex; align-items: center; gap: 8px;">
-      <button id="openGuideBtn" class="nav-filter-btn" style="display: flex; align-items: center; gap: 4px; border: 1px solid rgba(0,0,0,0.08); background: rgba(255,255,255,0.5);">
-        數據指南
-      </button>
+      <button id="openGuideBtn" class="nav-filter-btn" style="border: 1px solid rgba(0,0,0,0.08); background: #fff;">數據指南</button>
       <div class="live-badge"><span class="live-dot"></span>已連線</div>
     </div>
   </nav>
@@ -280,12 +186,12 @@
     <div class="card kpi-card c-brand primary-accent">
       <div class="kpi-label">團隊總產值指數</div>
       <div class="kpi-val"><span id="kpiTotal">—</span><span class="kpi-unit">PTS</span></div>
-      <div class="kpi-sub">目前活躍案件總負荷</div>
+      <div class="kpi-sub">活躍負荷總和</div>
     </div>
     <div class="card kpi-card c-amber">
       <div class="kpi-label">執行中案件</div>
       <div class="kpi-val"><span id="kpiExecuting">—</span><span class="kpi-unit">件</span></div>
-      <div class="kpi-sub">正在執行階段</div>
+      <div class="kpi-sub">Executing 狀態</div>
     </div>
     <div class="card kpi-card c-green">
       <div class="kpi-label">平均每人負載</div>
@@ -295,7 +201,7 @@
     <div class="card kpi-card c-blue">
       <div class="kpi-label">歷史累積專案</div>
       <div class="kpi-val"><span id="kpiCount">—</span><span class="kpi-unit">件</span></div>
-      <div class="kpi-sub">含已歸檔資料</div>
+      <div class="kpi-sub">含已歸檔案件</div>
     </div>
   </div>
 
@@ -305,7 +211,7 @@
         <span class="chart-title">個人實質產值分佈 (Active)</span>
         <span class="pill-badge" id="memberBadge">— members</span>
       </div>
-      <div style="position: relative; flex: 1; min-height: 150px; width: 100%;">
+      <div style="position: relative; flex: 1; min-height: 180px;">
         <canvas id="memberChart"></canvas>
       </div>
     </div>
@@ -314,7 +220,7 @@
         <span class="chart-title">專案階段佔比 (History)</span>
         <span class="pill-badge" id="stageBadge">— projects</span>
       </div>
-      <div style="max-width:120px;margin:0 auto;"><canvas id="stageChart"></canvas></div>
+      <div style="max-width:130px;margin:0 auto;"><canvas id="stageChart"></canvas></div>
       <div class="stage-legend" id="stageLegend"></div>
     </div>
   </div>
@@ -328,33 +234,51 @@
   </div>
 
   <footer>
-    IM Capacity · Signal V5.8 &nbsp;·&nbsp; Google Sheets → GAS → GitHub → Cloudflare Pages
+    IM Capacity · Signal V5.9 &nbsp;·&nbsp; Google Sheets → GAS → GitHub → Cloudflare Pages
   </footer>
 </div>
 
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 <aside class="sidebar" id="infoSidebar">
   <div class="sidebar-header">
-    <span class="sidebar-title">數據定義與指南</span>
+    <span class="sidebar-title">📊 數據定義與指南</span>
     <button class="close-btn" id="closeGuideBtn">✕</button>
   </div>
   <div class="sidebar-content">
     <div class="info-grid">
       <div class="info-col">
         <div class="info-col-title">🚦 容量分級 (Capacity Grades)</div>
-        <ul style="list-style:none">
-          <li><span class="info-dot" style="background:var(--green)"></span><div><b>0-300 Available</b> 尚有 50% 以上量能。</div></li>
-          <li><span class="info-dot" style="background:#E5B440"></span><div><b>300-600 Healthy</b> 黃金比例輸出狀態。</div></li>
-          <li><span class="info-dot" style="background:var(--amber)"></span><div><b>600-800 Warning</b> 高壓區，建議暫停進案。</div></li>
-          <li><span class="info-dot" style="background:var(--brand)"></span><div><b>>800 Overload</b> 超載，出錯率大增。</div></li>
+        <ul class="info-list">
+          <li><span class="info-dot dot-g"></span><div><b>0-300 (Available)</b><br>尚有 50% 以上量能，可立即支援大型 Brief。</div></li>
+          <li><span class="info-dot dot-y"></span><div><b>300-600 (Healthy)</b><br>黃金比例。工作充實能維持品質，可處理突發狀況。</div></li>
+          <li><span class="info-dot dot-o"></span><div><b>600-800 (Warning)</b><br>高壓區。無多餘心力執行新案，需專注現有交付。</div></li>
+          <li><span class="info-dot dot-r"></span><div><span class="text-highlight">>800 (Overload) 爆載區</span><br>待辦已超工時極限，出錯率大增需分流。</div></li>
         </ul>
       </div>
       <div class="info-col">
-        <div class="info-col-title">⚖️ 產值計算基準</div>
-        <div class="info-text"><b>為何 800 分超載？</b><br>基準：3個執行中大案(20人/雙平台) = 360 PTS。加上5-10個提案事務，健康總分落在 500-600。</div>
+        <div class="info-col-title">⚖️ 產值計算基準 (Thresholds)</div>
+        <div class="info-text">
+          <b>為什麼 800 分算超載？</b><br>
+          設定一名優質 IM 在標準狀態下，能深度處理 <b>3 個執行中案子</b> (平均各 20 位網紅、雙平台)。<br><br>
+          <b>計算公式：</b><br>
+          3案 × 4.0(權重) × 20人 × 1.5(平台) = <b>360 PTS</b>。<br>
+          加上同時處理的 5-10 個提案溝通，健康總分約落在 <b>500-600 PTS</b> 之間。
+        </div>
+      </div>
+      <div class="info-col">
+        <div class="info-col-title">📈 團隊數據應用 (Actions)</div>
+        <div class="info-text">
+          <b>預測招聘需求：</b><br>全隊平均負載連續四週 >700，即為客觀加人信號。<br><br>
+          <b>判斷業務健康度：</b><br>
+          • <b>總分高＋案量少：</b>高價值大案，需精細管理。<br>
+          • <b>總分低＋案量多：</b>碎片化小案，人力效益極低。<br><br>
+          <b>異動調度 (Agile)：</b> 案進件時，一眼即知誰能接球，減少詢問成本。
+        </div>
       </div>
     </div>
-    <div class="info-footer-quote">「將人力精準投放在最高價值(產值指數最高)的專案上。」</div>
+    <div class="info-footer-quote">
+      「為了讓 IM 部門的產能變成一種可以被管理的資產。有了這組數字，我們能把最貴的人力精準地投放在最高價值的專案上。」
+    </div>
   </div>
 </aside>
 
@@ -417,8 +341,8 @@
     countUp(document.getElementById('kpiExecuting'), exCount);
     countUp(document.getElementById('kpiAvg'), mCount ? Math.round(totalLoad/mCount) : 0);
     countUp(document.getElementById('kpiCount'), data.length);
-    document.getElementById('memberBadge').textContent = mCount + ' 活躍成員';
-    document.getElementById('stageBadge').textContent = data.length + ' 總專案量';
+    document.getElementById('memberBadge').textContent = mCount + ' members';
+    document.getElementById('stageBadge').textContent = data.length + ' projects';
 
     const sorted = Object.entries(members).sort((a,b) => b[1].score - a[1].score);
     if(mChart) mChart.destroy();
