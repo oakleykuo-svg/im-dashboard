@@ -68,7 +68,7 @@
 
     <script>
         // 抓取 GitHub 上的 data.json
-        fetch('data.json')
+        fetch('data.json?v=' + Date.now()) // 加一個時間戳記，騙過瀏覽器快取
             .then(res => res.json())
             .then(data => {
                 processDashboard(data);
