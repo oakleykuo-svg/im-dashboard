@@ -7,16 +7,14 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <!-- 移除了 Orbitron，專注使用 DM Sans 打造高級感 -->
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet" />
 
   <style>
     :root {
       --brand:         #E14F4B;
-      /* 全新定義的極光漸層色系 (融入 Pantone 1797C) */
-      --aurora-1:      #E14F4B; /* 主品牌色 Pantone 1797C */
-      --aurora-2:      #D67A73; /* 珊瑚暖粉 (過渡色) */
-      --aurora-3:      #A28C86; /* 莫蘭迪灰棕 (玻璃底色) */
+      --aurora-1:      #E14F4B; 
+      --aurora-2:      #D67A73; 
+      --aurora-3:      #A28C86; 
       
       --bg:            #F5F3F0;
       --glass:         rgba(255, 255, 255, 0.62);
@@ -81,11 +79,9 @@
       animation: fadeUp 0.4s ease both;
     }
 
-    /* --- 新版 Logo 設計 --- */
     .logo { display: flex; align-items: center; gap: 12px; padding-left: 4px; }
     .logo-mark {
       width: 34px; height: 34px; border-radius: 10px;
-      /* 極光漸層背景 */
       background: linear-gradient(135deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%);
       box-shadow: 0 4px 12px rgba(92, 133, 150, 0.25), inset 0 1px 1px rgba(255,255,255,0.4);
       display: grid; place-items: center;
@@ -105,10 +101,17 @@
     }
     .logo-dot { width: 4px; height: 4px; background: var(--brand); border-radius: 50%; opacity: 0.8; }
 
-    /* --- 新版 極光漸層 Filters (還原圖片風格) --- */
+    /* 【修復】統一設定更新時間的樣式：小字、淺色、優雅 */
+    #lastUpdated {
+      font-size: 11px;
+      color: var(--text-secondary);
+      font-weight: 500;
+      letter-spacing: 0.05em;
+      opacity: 0.6;
+    }
+
     .nav-filters { 
       display: flex; align-items: center; gap: 4px; 
-      /* 外層半透明白色膠囊 */
       background: rgba(255, 255, 255, 0.5);
       border: 1px solid rgba(0, 0, 0, 0.04);
       padding: 4px;
@@ -125,7 +128,6 @@
     .nav-filter-btn:hover:not(.active) { color: var(--text-primary); background: rgba(255,255,255,0.6); }
     .nav-filter-btn:hover:not(.active) svg { opacity: 1; }
     
-    /* 啟動時的極光漸層 */
     .nav-filter-btn.active {
       background: linear-gradient(120deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%);
       color: #fff; 
@@ -164,7 +166,6 @@
       font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
       color: var(--text-muted); margin-bottom: 8px;
     }
-    /* 數字改用 DM Sans 加上特殊間距，取代 Orbitron */
     .kpi-val {
       font-size: 32px; font-weight: 800; letter-spacing: -0.04em;
       line-height: 1; display: flex; align-items: baseline; gap: 4px;
@@ -315,7 +316,6 @@
       </div>
     </div>
 
-    <!-- 全新膠囊外框與帶有 Icon 的極光按鈕 -->
     <div class="nav-filters" id="filterGroup">
       <button class="nav-filter-btn active" data-filter="all">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
@@ -336,7 +336,7 @@
     </div>
 
     <div style="display: flex; align-items: center; gap: 8px;">
-      <div id="lastUpdated" style="margin-right: 4px;">正在連線...</div>
+      <div id="lastUpdated">正在連線...</div>
       <button id="openGuideBtn" class="nav-filter-btn" style="border: 1px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.7); box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
         指南
@@ -397,7 +397,7 @@
   </div>
 
   <footer>
-    IM Capacity · Signal V5.5 &nbsp;·&nbsp; Google Sheets → GAS → GitHub → Cloudflare Pages
+    IM Capacity · Signal V5.6 &nbsp;·&nbsp; Google Sheets → GAS → GitHub → Cloudflare Pages
   </footer>
 </div>
 
@@ -517,7 +517,6 @@
     const vals = sorted.map(([,v]) => Math.round(v.score));
     const bCols = labels.map((_,i) => PALETTE[i % PALETTE.length]);
     
-    // 更新長條圖，讓字體也對齊新版設計
     Chart.defaults.font.family = "'DM Sans', sans-serif";
     if(mChart) mChart.destroy();
     mChart = new Chart(document.getElementById('memberChart').getContext('2d'), {
@@ -614,15 +613,14 @@
       const dates = data.map(d => new Date(d[KEYS.DATE])).filter(d => !isNaN(d));
       if(dates.length){
         const latest = new Date(Math.max(...dates));
-        // 時間格式也弄得簡潔高級一點
+        // JS 現在只負責填文字，樣式由上面的 CSS 統一接管
         document.getElementById('lastUpdated').textContent = latest.toLocaleString('zh-TW', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' 更新';
       }
       render(data);
     })
     .catch(e => {
-      // 【修改】將 Demo Mode 改為極低調的淺色小字，字體調整為 11px
-      const lastUpdatedEl = document.getElementById('lastUpdated');
-      lastUpdatedEl.innerHTML = '<span style="font-size: 11px; opacity: 0.5; letter-spacing: 0.05em;">預覽模式</span>';
+      // JS 現在只負責填文字，樣式由上面的 CSS 統一接管
+      document.getElementById('lastUpdated').textContent = '預覽模式';
       
       rawData = [
         {"IM PIC":"Alice", "狀態":"Executing", "產值指數": 860, "最新更新": new Date().toISOString()},
