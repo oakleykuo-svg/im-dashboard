@@ -7,19 +7,21 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet" />
+  <!-- 移除了 Orbitron，專注使用 DM Sans 打造高級感 -->
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;0,9..40,800&display=swap" rel="stylesheet" />
 
   <style>
     :root {
       --brand:         #E14F4B;
-      --brand-soft:    rgba(225, 79, 75, 0.09);
-      --brand-mid:     rgba(225, 79, 75, 0.22);
-      --brand-glow:    rgba(225, 79, 75, 0.18);
+      /* 全新定義的極光漸層色系 (融入 Pantone 1797C) */
+      --aurora-1:      #E14F4B; /* 主品牌色 Pantone 1797C */
+      --aurora-2:      #D67A73; /* 珊瑚暖粉 (過渡色) */
+      --aurora-3:      #A28C86; /* 莫蘭迪灰棕 (玻璃底色) */
+      
       --bg:            #F5F3F0;
       --glass:         rgba(255, 255, 255, 0.62);
       --glass-strong:  rgba(255, 255, 255, 0.82);
       --glass-border:  rgba(255, 255, 255, 0.90);
-      --glass-edge:    rgba(200, 195, 188, 0.45);
       --text-primary:  #1A1814;
       --text-secondary:#6B6760;
       --text-muted:    #AAA49D;
@@ -27,7 +29,7 @@
       --green:  #1B9E5A;
       --blue:   #2B72C8;
       --purple: #7C5CBF;
-      --r: 14px; /* 【縮小】圓角，提升精緻感 */
+      --r: 14px;
       --shadow: 0 2px 20px rgba(0,0,0,0.06), 0 1px 3px rgba(0,0,0,0.04);
       --shadow-md: 0 8px 40px rgba(0,0,0,0.08), 0 2px 8px rgba(0,0,0,0.04);
     }
@@ -44,13 +46,13 @@
       position: fixed; inset: 0; z-index: 0; pointer-events: none;
       background:
         radial-gradient(ellipse 70% 50% at 15% -5%,  rgba(225,79,75,0.07)  0%, transparent 55%),
-        radial-gradient(ellipse 50% 40% at 85% 100%, rgba(43,114,200,0.06) 0%, transparent 55%),
+        radial-gradient(ellipse 50% 40% at 85% 100%, rgba(92,133,150,0.08) 0%, transparent 55%),
         radial-gradient(ellipse 60% 60% at 50% 50%,  rgba(255,252,248,0.9) 0%, transparent 100%);
     }
     .layout {
       position: relative; z-index: 1;
       max-width: 1400px; margin: 0 auto;
-      padding: 16px 20px 32px; /* 【縮小】外距 */
+      padding: 16px 20px 32px;
     }
     .card {
       background: var(--glass);
@@ -68,7 +70,7 @@
       display: flex; align-items: center;
       justify-content: space-between; gap: 10px;
       padding: 8px 12px 8px 10px;
-      margin-bottom: 16px; /* 【縮小】間距 */
+      margin-bottom: 16px;
       background: var(--glass-strong);
       backdrop-filter: blur(28px) saturate(1.8);
       -webkit-backdrop-filter: blur(28px) saturate(1.8);
@@ -78,34 +80,58 @@
       flex-wrap: wrap;
       animation: fadeUp 0.4s ease both;
     }
-    .logo { display: flex; align-items: center; gap: 10px; }
-    .logo-mark {
-      width: 32px; height: 32px; border-radius: 10px;
-      background: rgba(255,255,255,0.55);
-      backdrop-filter: blur(16px) saturate(2);
-      -webkit-backdrop-filter: blur(16px) saturate(2);
-      border: 1.5px solid rgba(255,255,255,0.92);
-      box-shadow: 0 2px 14px rgba(225,79,75,0.14), inset 0 1px 1px rgba(255,255,255,0.85);
-      display: grid; place-items: center;
-      flex-shrink: 0; position: relative; overflow: hidden;
-    }
-    .logo-mark svg { width: 15px; height: 15px; stroke: var(--brand); fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; position: relative; z-index: 1; }
-    .logo-text { font-family: 'Orbitron', sans-serif; font-size: 12px; font-weight: 800; letter-spacing: 0.08em; color: var(--text-primary); }
-    .logo-text em { color: var(--brand); font-style: normal; }
-    #lastUpdated { font-size: 10px; color: var(--text-muted); font-weight: 400; margin-top: 1px; }
 
-    .nav-filters { display: flex; align-items: center; gap: 2px; }
+    /* --- 新版 Logo 設計 --- */
+    .logo { display: flex; align-items: center; gap: 12px; padding-left: 4px; }
+    .logo-mark {
+      width: 34px; height: 34px; border-radius: 10px;
+      /* 極光漸層背景 */
+      background: linear-gradient(135deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%);
+      box-shadow: 0 4px 12px rgba(92, 133, 150, 0.25), inset 0 1px 1px rgba(255,255,255,0.4);
+      display: grid; place-items: center;
+      flex-shrink: 0; position: relative;
+    }
+    .logo-mark svg { width: 16px; height: 16px; stroke: #fff; fill: none; stroke-width: 2.2; stroke-linecap: round; stroke-linejoin: round; }
+    
+    .logo-text-wrapper { display: flex; flex-direction: column; justify-content: center; }
+    .logo-main { 
+      font-size: 15px; font-weight: 800; letter-spacing: -0.02em; 
+      color: var(--text-primary); line-height: 1.1; 
+    }
+    .logo-sub { 
+      font-size: 9px; font-weight: 700; letter-spacing: 0.18em; 
+      color: var(--text-muted); text-transform: uppercase; margin-top: 1px;
+      display: flex; align-items: center; gap: 4px;
+    }
+    .logo-dot { width: 4px; height: 4px; background: var(--brand); border-radius: 50%; opacity: 0.8; }
+
+    /* --- 新版 極光漸層 Filters (還原圖片風格) --- */
+    .nav-filters { 
+      display: flex; align-items: center; gap: 4px; 
+      /* 外層半透明白色膠囊 */
+      background: rgba(255, 255, 255, 0.5);
+      border: 1px solid rgba(0, 0, 0, 0.04);
+      padding: 4px;
+      border-radius: 100px;
+    }
     .nav-filter-btn {
+      display: flex; align-items: center; gap: 6px;
       padding: 6px 14px; border-radius: 100px; border: none;
       background: transparent; color: var(--text-secondary);
-      font-family: 'DM Sans', sans-serif; font-size: 11px; font-weight: 600;
-      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+      font-family: 'DM Sans', sans-serif; font-size: 12px; font-weight: 600;
+      cursor: pointer; transition: all 0.3s ease; white-space: nowrap;
     }
-    .nav-filter-btn:hover { color: var(--text-primary); background: rgba(0,0,0,0.04); }
+    .nav-filter-btn svg { width: 14px; height: 14px; opacity: 0.7; transition: opacity 0.3s ease; }
+    .nav-filter-btn:hover:not(.active) { color: var(--text-primary); background: rgba(255,255,255,0.6); }
+    .nav-filter-btn:hover:not(.active) svg { opacity: 1; }
+    
+    /* 啟動時的極光漸層 */
     .nav-filter-btn.active {
-      background: linear-gradient(135deg, #E14F4B, #C84040);
-      color: #fff; box-shadow: 0 2px 12px rgba(225,79,75,0.28);
+      background: linear-gradient(120deg, var(--aurora-1) 0%, var(--aurora-2) 50%, var(--aurora-3) 100%);
+      color: #fff; 
+      box-shadow: 0 4px 12px rgba(92, 133, 150, 0.25);
     }
+    .nav-filter-btn.active svg { stroke: #fff; opacity: 1; }
 
     .live-badge {
       display: flex; align-items: center; gap: 5px;
@@ -132,24 +158,23 @@
     .kpi-card.c-amber::before { background: radial-gradient(circle,rgba(212,130,10,0.12),transparent 70%); }
     .kpi-card.c-green::before { background: radial-gradient(circle,rgba(27,158,90,0.12),transparent 70%); }
     .kpi-card.c-blue::before  { background: radial-gradient(circle,rgba(43,114,200,0.12),transparent 70%); }
-    .kpi-card.primary-accent  { border-top: 3px solid var(--brand); padding-top: 13px; }
 
     .kpi-label {
       display: flex; align-items: center; gap: 6px;
       font-size: 10px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase;
       color: var(--text-muted); margin-bottom: 8px;
     }
+    /* 數字改用 DM Sans 加上特殊間距，取代 Orbitron */
     .kpi-val {
-      font-family: 'Orbitron', sans-serif; font-size: 30px; font-weight: 800;
-      line-height: 1; letter-spacing: -0.02em;
-      display: flex; align-items: baseline; gap: 4px;
+      font-size: 32px; font-weight: 800; letter-spacing: -0.04em;
+      line-height: 1; display: flex; align-items: baseline; gap: 4px;
     }
-    .kpi-unit { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 400; color: var(--text-muted); }
+    .kpi-unit { font-size: 11px; font-weight: 600; letter-spacing: 0; color: var(--text-muted); }
     .c-brand .kpi-val { color: var(--brand); }
     .c-amber .kpi-val { color: var(--amber); }
     .c-green .kpi-val { color: var(--green); }
     .c-blue  .kpi-val { color: var(--blue);  }
-    .kpi-sub { font-size: 10px; color: var(--text-muted); font-weight: 400; margin-top: 6px; }
+    .kpi-sub { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 6px; }
 
     /* Charts */
     .chart-row { display: grid; grid-template-columns: 1fr 280px; gap: 12px; margin-bottom: 16px; }
@@ -166,18 +191,17 @@
     .legend-row { display: flex; align-items: center; justify-content: space-between; font-size: 10px; }
     .legend-l { display: flex; align-items: center; gap: 6px; }
     .legend-swatch { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
-    .legend-name { color: var(--text-secondary); font-weight: 500; }
-    .legend-n { font-family: 'Orbitron', sans-serif; font-size: 10px; font-weight: 700; color: var(--text-primary); }
+    .legend-name { color: var(--text-secondary); font-weight: 600; }
+    .legend-n { font-size: 11px; font-weight: 700; color: var(--text-primary); }
     .legend-bar-track { height: 2px; background: rgba(0,0,0,0.07); border-radius: 2px; margin-top: 3px; }
     .legend-bar-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
 
     /* Leaderboard */
     .leaderboard-card { padding: 16px 20px; }
     .lb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-    .lb-title { font-family: 'Orbitron', sans-serif; font-size: 11px; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--brand); }
-    .lb-sub { font-size: 10px; color: var(--text-muted); font-weight: 400; }
+    .lb-title { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; color: var(--text-primary); }
+    .lb-sub { font-size: 10px; color: var(--text-muted); font-weight: 500; }
     
-    /* 【精緻化】限制名單高度並加入美觀的卷軸 */
     .member-list { 
       display: flex; flex-direction: column; gap: 12px; 
       max-height: 240px; overflow-y: auto; padding-right: 6px;
@@ -189,7 +213,7 @@
 
     .member-meta { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
     .member-l { display: flex; align-items: center; gap: 8px; }
-    .rank-num { font-family: 'Orbitron', sans-serif; font-size: 9px; font-weight: 700; color: var(--text-muted); width: 14px; }
+    .rank-num { font-size: 10px; font-weight: 800; color: var(--text-muted); width: 14px; }
     .avatar {
       width: 26px; height: 26px; border-radius: 7px;
       display: grid; place-items: center; font-size: 11px; font-weight: 700; flex-shrink: 0;
@@ -201,12 +225,12 @@
     .av3 { background:rgba(27,158,90,0.12);  color:#1B9E5A; }
     .av4 { background:rgba(212,130,10,0.12); color:#D4820A; }
     .av5 { background:rgba(100,100,100,0.09);color:#6B6760; }
-    .member-name { font-size: 12px; font-weight: 600; color: var(--text-primary); line-height: 1.2; }
-    .member-cases { font-size: 9px; color: var(--text-muted); font-weight: 400; margin-top: 1px; }
+    .member-name { font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
+    .member-cases { font-size: 9px; color: var(--text-muted); font-weight: 500; margin-top: 1px; }
     .member-r { display: flex; align-items: center; gap: 8px; }
-    .pts-num { font-family: 'Orbitron', sans-serif; font-size: 14px; font-weight: 800; }
-    .pts-unit { font-family: 'Orbitron', sans-serif; font-size: 8px; color: var(--text-muted); margin-left: 2px; }
-    .status-chip { font-size: 8px; font-weight: 700; padding: 3px 7px; border-radius: 100px; letter-spacing: 0.05em; text-transform: uppercase; }
+    .pts-num { font-size: 14px; font-weight: 800; letter-spacing: -0.02em; }
+    .pts-unit { font-size: 9px; font-weight: 600; color: var(--text-muted); margin-left: 2px; }
+    .status-chip { font-size: 8px; font-weight: 800; padding: 3px 7px; border-radius: 100px; letter-spacing: 0.05em; text-transform: uppercase; }
     .chip-danger  { background:rgba(225,79,75,0.10);  color:var(--brand);  border:1px solid rgba(225,79,75,0.22); }
     .chip-warning { background:rgba(212,130,10,0.10); color:var(--amber);  border:1px solid rgba(212,130,10,0.22); }
     .chip-ok      { background:rgba(27,158,90,0.10);  color:var(--green);  border:1px solid rgba(27,158,90,0.22); }
@@ -216,47 +240,7 @@
     .fill-warning { background: linear-gradient(90deg, #F0C060, #D4820A); }
     .fill-ok      { background: linear-gradient(90deg, #6FDDA8, #1B9E5A); }
 
-    /* 【新增】數據定義與管理指南 */
-    .info-card { padding: 18px 20px; margin-top: 16px; }
-    .info-header { margin-bottom: 12px; display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; }
-    .info-title { font-size: 11px; font-weight: 700; color: var(--text-primary); letter-spacing: 0.05em; }
-    .info-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 10px; }
-    .info-col { 
-      background: rgba(255, 255, 255, 0.45); 
-      padding: 12px; 
-      border-radius: 10px; 
-      border: 1px solid rgba(255, 255, 255, 0.7); 
-    }
-    .info-col-title { 
-      font-size: 10px; font-weight: 700; color: var(--text-secondary); 
-      margin-bottom: 6px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 5px; 
-    }
-    .info-text { font-size: 10px; color: var(--text-secondary); line-height: 1.5; }
-    .info-text b { color: var(--text-primary); font-weight: 600; }
-    .info-list { list-style: none; }
-    .info-list li { font-size: 10px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 5px; display: flex; align-items: flex-start; }
-    .info-list li b { color: var(--text-primary); font-weight: 600; margin-right: 4px; }
-    .info-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-top: 4px; margin-right: 6px; flex-shrink: 0; }
-    .dot-g { background: var(--green); }
-    .dot-y { background: #E5B440; } 
-    .dot-o { background: var(--amber); }
-    .dot-r { background: var(--brand); }
-    .text-highlight { color: var(--brand); font-weight: 600; }
-    
-    /* 系統核心理念區塊 */
-    .info-footer-quote {
-      margin-top: 12px;
-      padding: 10px 14px;
-      background: rgba(225, 79, 75, 0.04);
-      border-left: 3px solid var(--brand);
-      border-radius: 0 6px 6px 0;
-      font-size: 10px;
-      color: var(--text-primary);
-      font-weight: 500;
-      line-height: 1.6;
-    }
-
-    /* 【新增】側邊欄 (Sidebar) 樣式 */
+    /* 側邊欄 (Sidebar) */
     .sidebar-backdrop {
       position: fixed; inset: 0; background: rgba(0,0,0,0.15); backdrop-filter: blur(3px);
       z-index: 99; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
@@ -276,7 +260,7 @@
       padding: 20px 24px; border-bottom: 1px solid rgba(0,0,0,0.06);
       display: flex; justify-content: space-between; align-items: center;
     }
-    .sidebar-title { font-size: 12px; font-weight: 800; color: var(--text-primary); letter-spacing: 0.05em; display: flex; align-items: center; gap: 6px; }
+    .sidebar-title { font-size: 13px; font-weight: 800; color: var(--text-primary); letter-spacing: 0.02em; display: flex; align-items: center; gap: 6px; }
     .close-btn {
       background: rgba(0,0,0,0.04); border: none; width: 28px; height: 28px; border-radius: 50%;
       display: grid; place-items: center; cursor: pointer; color: var(--text-secondary); transition: all 0.2s;
@@ -286,9 +270,26 @@
     .sidebar-content::-webkit-scrollbar { width: 4px; }
     .sidebar-content::-webkit-scrollbar-track { background: transparent; }
     .sidebar-content::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 10px; }
-    .sidebar .info-grid { display: flex; flex-direction: column; gap: 12px; }
+    
+    .info-grid { display: flex; flex-direction: column; gap: 12px; }
+    .info-col { background: rgba(255, 255, 255, 0.45); padding: 12px; border-radius: 10px; border: 1px solid rgba(255, 255, 255, 0.7); }
+    .info-col-title { font-size: 11px; font-weight: 800; color: var(--text-secondary); margin-bottom: 6px; border-bottom: 1px solid rgba(0,0,0,0.05); padding-bottom: 5px; }
+    .info-text { font-size: 11px; color: var(--text-secondary); line-height: 1.5; font-weight: 500;}
+    .info-text b { color: var(--text-primary); font-weight: 700; }
+    .info-list { list-style: none; }
+    .info-list li { font-size: 11px; color: var(--text-secondary); line-height: 1.5; margin-bottom: 5px; display: flex; align-items: flex-start; font-weight: 500;}
+    .info-list li b { color: var(--text-primary); font-weight: 700; margin-right: 4px; }
+    .info-dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-top: 4px; margin-right: 6px; flex-shrink: 0; }
+    .dot-g { background: var(--green); } .dot-y { background: #E5B440; } .dot-o { background: var(--amber); } .dot-r { background: var(--brand); }
+    .text-highlight { color: var(--brand); font-weight: 700; }
+    
+    .info-footer-quote {
+      margin-top: 12px; padding: 12px 14px; background: rgba(92, 133, 150, 0.06);
+      border-left: 3px solid var(--aurora-1); border-radius: 0 6px 6px 0;
+      font-size: 11px; color: var(--text-primary); font-weight: 600; line-height: 1.6;
+    }
 
-    footer { text-align:center; font-size:9px; color:var(--text-muted); font-weight:400; letter-spacing:0.05em; padding-top:16px; border-top:1px solid rgba(0,0,0,0.05); margin-top:16px; }
+    footer { text-align:center; font-size:10px; color:var(--text-muted); font-weight:500; letter-spacing:0.05em; padding-top:16px; border-top:1px solid rgba(0,0,0,0.05); margin-top:16px; }
 
     @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
     .card { animation: fadeUp 0.45s ease both; }
@@ -301,33 +302,51 @@
   <nav>
     <div class="logo">
       <div class="logo-mark">
-        <svg viewBox="0 0 24 24"><polygon points="12 2 19 8 12 22 5 8"/><line x1="5" y1="8" x2="19" y2="8"/></svg>
+        <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+          <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+        </svg>
       </div>
-      <div>
-        <div class="logo-text">IM <em>CAPACITY</em> · SIGNAL</div>
-        <div id="lastUpdated">正在連線...</div>
+      <div class="logo-text-wrapper">
+        <div class="logo-main">IM CAPACITY</div>
+        <div class="logo-sub"><span class="logo-dot"></span> SIGNAL SYSTEM</div>
       </div>
     </div>
 
+    <!-- 全新膠囊外框與帶有 Icon 的極光按鈕 -->
     <div class="nav-filters" id="filterGroup">
-      <button class="nav-filter-btn active" data-filter="all">全部</button>
-      <button class="nav-filter-btn" data-filter="week">本週</button>
-      <button class="nav-filter-btn" data-filter="month">本月</button>
-      <button class="nav-filter-btn" data-filter="quarter">本季</button>
+      <button class="nav-filter-btn active" data-filter="all">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+        全部
+      </button>
+      <button class="nav-filter-btn" data-filter="week">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+        本週
+      </button>
+      <button class="nav-filter-btn" data-filter="month">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line><path d="M8 14h.01"></path><path d="M12 14h.01"></path><path d="M16 14h.01"></path><path d="M8 18h.01"></path><path d="M12 18h.01"></path><path d="M16 18h.01"></path></svg>
+        本月
+      </button>
+      <button class="nav-filter-btn" data-filter="quarter">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.21 15.89A10 10 0 1 1 8 2.83"></path><path d="M22 12A10 10 0 0 0 12 2v10z"></path></svg>
+        本季
+      </button>
     </div>
 
-    <!-- 【新增】將狀態徽章與指南按鈕包裝在一起 -->
     <div style="display: flex; align-items: center; gap: 8px;">
-      <button id="openGuideBtn" class="nav-filter-btn" style="display: flex; align-items: center; gap: 4px; border: 1px solid rgba(0,0,0,0.08); background: rgba(255,255,255,0.5);">
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
-        數據指南
+      <div id="lastUpdated" style="margin-right: 4px;">正在連線...</div>
+      <button id="openGuideBtn" class="nav-filter-btn" style="border: 1px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.7); box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+        指南
       </button>
       <div class="live-badge"><span class="live-dot"></span>已連線</div>
     </div>
   </nav>
 
   <div class="kpi-grid">
-    <div class="card kpi-card c-brand primary-accent">
+    <div class="card kpi-card c-brand">
       <div class="kpi-label">團隊總產值指數</div>
       <div class="kpi-val"><span id="kpiTotal">—</span><span class="kpi-unit">PTS</span></div>
       <div class="kpi-sub">目前活躍案件總負荷</div>
@@ -350,13 +369,11 @@
   </div>
 
   <div class="chart-row">
-    <!-- 【修改】加入 style="display: flex; flex-direction: column;" 讓內部能彈性延展 -->
     <div class="card chart-card" style="display: flex; flex-direction: column;">
       <div class="chart-header">
         <span class="chart-title">個人實質產值分佈 (Active)</span>
         <span class="pill-badge" id="memberBadge">— members</span>
       </div>
-      <!-- 【修改】改為 flex: 1，讓圖表自動長大填滿下方空白 -->
       <div style="position: relative; flex: 1; min-height: 150px; width: 100%;">
         <canvas id="memberChart"></canvas>
       </div>
@@ -366,7 +383,6 @@
         <span class="chart-title">專案階段佔比 (History)</span>
         <span class="pill-badge" id="stageBadge">— projects</span>
       </div>
-      <!-- 【縮小】甜甜圈圖外框 -->
       <div style="max-width:120px;margin:0 auto;"><canvas id="stageChart"></canvas></div>
       <div class="stage-legend" id="stageLegend"></div>
     </div>
@@ -377,16 +393,14 @@
       <span class="lb-title">IM CAPACITY ALLOCATION</span>
       <span class="lb-sub">數據已排除歸檔案件，顯示當前真實壓力。</span>
     </div>
-    <!-- 有 Scrollbar 的小巧清單 -->
     <div class="member-list" id="memberList"></div>
   </div>
 
   <footer>
-    IM Capacity · Signal V5.3 &nbsp;·&nbsp; Google Sheets → GAS → GitHub → Cloudflare Pages
+    IM Capacity · Signal V5.5 &nbsp;·&nbsp; Google Sheets → GAS → GitHub → Cloudflare Pages
   </footer>
 </div>
 
-<!-- 【新增】將原本的數據指南替換為側邊欄結構 (需放在 layout 外面或最底部) -->
 <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
 <aside class="sidebar" id="infoSidebar">
   <div class="sidebar-header">
@@ -427,7 +441,6 @@
         </div>
       </div>
     </div>
-    <!-- 核心理念引言 -->
     <div class="info-footer-quote">
       「為了讓 IM 部門的產能變成一種可以被管理的資產。有了這組數字，我們能把最貴的人力（IM 的時間），精準地投放在最高價值（產值指數最高）的專案上。」
     </div>
@@ -504,17 +517,19 @@
     const vals = sorted.map(([,v]) => Math.round(v.score));
     const bCols = labels.map((_,i) => PALETTE[i % PALETTE.length]);
     
+    // 更新長條圖，讓字體也對齊新版設計
+    Chart.defaults.font.family = "'DM Sans', sans-serif";
     if(mChart) mChart.destroy();
     mChart = new Chart(document.getElementById('memberChart').getContext('2d'), {
       type: 'bar',
       data: { labels, datasets:[{ label:'產值指數', data:vals, backgroundColor: bCols.map(c=>c+'28'), borderColor: bCols, borderWidth:2, borderRadius:6 }]},
       options: {
         responsive: true,
-        maintainAspectRatio: false, /* 解除預設比例，配合 HTML height 壓縮高度 */
-        plugins: { legend: { display: false }, tooltip: { padding: 10 } },
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false }, tooltip: { padding: 10, titleFont: { size: 13 }, bodyFont: { size: 12 } } },
         scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 9 } } },
-          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 9 } } }
+          x: { grid: { display: false }, ticks: { font: { size: 10, weight: '600' } } },
+          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10, weight: '600' } } }
         }
       }
     });
@@ -526,7 +541,7 @@
     sChart = new Chart(document.getElementById('stageChart').getContext('2d'), {
       type: 'doughnut',
       data: { labels: sL, datasets: [{ data: sV, backgroundColor: sC.map(c=>c+'33'), borderColor: sC, borderWidth: 2 }]},
-      options: { cutout: '68%', plugins: { legend: { display: false } } }
+      options: { cutout: '68%', plugins: { legend: { display: false }, tooltip: { titleFont: { size: 13 }, bodyFont: { size: 12 } } } }
     });
 
     const totalS = sV.reduce((a,b) => a+b, 0);
@@ -572,7 +587,6 @@
     render(filterData(rawData));
   });
 
-  // 【新增】側邊欄開關邏輯
   const infoSidebar = document.getElementById('infoSidebar');
   const sidebarBackdrop = document.getElementById('sidebarBackdrop');
   
@@ -590,7 +604,6 @@
   document.getElementById('closeGuideBtn').addEventListener('click', () => toggleSidebar(false));
   sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
 
-  // 抓取數據 (加入錯誤預覽資料)
   fetch('data.json?v=' + Date.now())
     .then(r => {
       if (!r.ok) throw new Error("Data file not found");
@@ -601,13 +614,16 @@
       const dates = data.map(d => new Date(d[KEYS.DATE])).filter(d => !isNaN(d));
       if(dates.length){
         const latest = new Date(Math.max(...dates));
-        document.getElementById('lastUpdated').textContent = '更新於 ' + latest.toLocaleString('zh-TW', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'});
+        // 時間格式也弄得簡潔高級一點
+        document.getElementById('lastUpdated').textContent = latest.toLocaleString('zh-TW', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' 更新';
       }
       render(data);
     })
     .catch(e => {
-      document.getElementById('lastUpdated').textContent = '預覽模式 (Demo)';
-      // 提供預覽用的假資料，這樣你在點擊 Preview 時也能確認版面
+      // 【修改】將 Demo Mode 改為極低調的淺色小字，字體調整為 11px
+      const lastUpdatedEl = document.getElementById('lastUpdated');
+      lastUpdatedEl.innerHTML = '<span style="font-size: 11px; opacity: 0.5; letter-spacing: 0.05em;">預覽模式</span>';
+      
       rawData = [
         {"IM PIC":"Alice", "狀態":"Executing", "產值指數": 860, "最新更新": new Date().toISOString()},
         {"IM PIC":"Bob", "狀態":"Executing", "產值指數": 610, "最新更新": new Date().toISOString()},
