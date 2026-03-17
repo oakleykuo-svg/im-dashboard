@@ -101,7 +101,6 @@
     }
     .logo-dot { width: 4px; height: 4px; background: var(--brand); border-radius: 50%; opacity: 0.8; }
 
-    /* 【修復】統一設定更新時間的樣式：小字、淺色、優雅 */
     #lastUpdated {
       font-size: 11px;
       color: var(--text-secondary);
@@ -227,7 +226,13 @@
     .av4 { background:rgba(212,130,10,0.12); color:#D4820A; }
     .av5 { background:rgba(100,100,100,0.09);color:#6B6760; }
     .member-name { font-size: 13px; font-weight: 700; color: var(--text-primary); line-height: 1.2; }
-    .member-cases { font-size: 9px; color: var(--text-muted); font-weight: 500; margin-top: 1px; }
+    .member-cases { font-size: 9px; color: var(--text-muted); font-weight: 500; margin-top: 2px; display: flex; align-items: center; }
+    
+    /* 新增：洞察標籤樣式 */
+    .case-tag { font-size: 8px; padding: 2px 5px; border-radius: 4px; margin-left: 5px; font-weight: 800; letter-spacing: 0.02em; }
+    .tag-complex { background: rgba(124, 92, 191, 0.08); color: var(--purple); }
+    .tag-volume { background: rgba(43, 114, 200, 0.08); color: var(--blue); }
+
     .member-r { display: flex; align-items: center; gap: 8px; }
     .pts-num { font-size: 14px; font-weight: 800; letter-spacing: -0.02em; }
     .pts-unit { font-size: 9px; font-weight: 600; color: var(--text-muted); margin-left: 2px; }
@@ -397,7 +402,7 @@
   </div>
 
   <footer>
-    IM Capacity · Signal V5.6 &nbsp;·&nbsp; Google Sheets → GAS → GitHub → Cloudflare Pages
+    IM Capacity · Signal V5.7 &nbsp;·&nbsp; Google Sheets → GAS → GitHub → Cloudflare Pages
   </footer>
 </div>
 
@@ -448,7 +453,9 @@
 </aside>
 
 <script>
-  const KEYS = { NAME: "IM PIC", STATUS: "狀態", SCORE: "產值指數", DATE: "最新更新" };
+  // 【重要】對應 Google Sheet 上的精確欄位名稱
+  const KEYS = { NAME: "IM PIC", STATUS: "狀態", SCORE: "產值指數", DATE: "最新更新", PROPOSED_KOL: "提案網紅數", EXEC_KOL: "執行網紅數" };
+  
   const STAGE_COLORS = { 'Executing':'#E14F4B','Contacting':'#D4820A','Proposed':'#2B72C8','Brief':'#7C5CBF','Closed':'#1B9E5A','Lost':'#C0BBB4' };
   const STAGE_ORDER = ['Executing','Contacting','Proposed','Brief','Closed','Lost'];
   const PALETTE = ['#E14F4B','#2B72C8','#7C5CBF','#1B9E5A','#D4820A','#888888'];
@@ -492,12 +499,21 @@
       const s = parseFloat(item[KEYS.SCORE]) || 0;
       const st = item[KEYS.STATUS] || 'Other';
       
+      // 智慧判斷：執行中的案子看「執行網紅數」，提案中的案子看「提案網紅數」
+      let k = 0;
+      if (st === 'Executing' || st === 'Closed') {
+        k = parseInt(item[KEYS.EXEC_KOL]) || parseInt(item[KEYS.PROPOSED_KOL]) || 0;
+      } else {
+        k = parseInt(item[KEYS.PROPOSED_KOL]) || parseInt(item[KEYS.EXEC_KOL]) || 0;
+      }
+      
       if (!isArchive) {
         totalLoad += s;
         if(st === 'Executing') exCount++;
-        if(!members[n]) members[n] = {score:0, count:0};
+        if(!members[n]) members[n] = {score:0, count:0, kolCount:0};
         members[n].score += s;
         members[n].count++;
+        members[n].kolCount += k; // 累加個人的總網紅數量
       }
       stages[st] = (stages[st] || 0) + 1;
     });
@@ -557,6 +573,16 @@
     sorted.forEach(([name, val], i) => {
       const pct = Math.min((val.score/THRESHOLD)*100, 100);
       let cls = pct > 85 ? 'danger' : (pct > 55 ? 'warning' : 'ok');
+      
+      // 【新增】計算平均網紅與洞察標籤
+      const avgKol = val.count > 0 ? Math.round(val.kolCount / val.count) : 0;
+      let insightTag = '';
+      if (avgKol >= 15) {
+        insightTag = `<span class="case-tag tag-complex">✦ 單案複雜</span>`;
+      } else if (avgKol > 0 && avgKol <= 7 && val.count >= 4) {
+        insightTag = `<span class="case-tag tag-volume">▤ 大量小案</span>`;
+      }
+
       const row = document.createElement('div');
       row.className = 'member-row';
       row.innerHTML = `
@@ -564,7 +590,12 @@
           <div class="member-l">
             <span class="rank-num">#${i+1}</span>
             <div class="avatar av${i%6}">${name[0]}</div>
-            <div><div class="member-name">${name}</div><div class="member-cases">${val.count} 個活躍專案</div></div>
+            <div>
+              <div class="member-name">${name}</div>
+              <div class="member-cases">
+                ${val.count} 專案 <span style="opacity:0.4;margin:0 4px">|</span> 均 ${avgKol} 網紅 ${insightTag}
+              </div>
+            </div>
           </div>
           <div class="member-r">
             <div><span class="pts-num" style="color:${PALETTE[i%6]}">${Math.round(val.score)}</span><span class="pts-unit">PTS</span></div>
@@ -613,22 +644,24 @@
       const dates = data.map(d => new Date(d[KEYS.DATE])).filter(d => !isNaN(d));
       if(dates.length){
         const latest = new Date(Math.max(...dates));
-        // JS 現在只負責填文字，樣式由上面的 CSS 統一接管
         document.getElementById('lastUpdated').textContent = latest.toLocaleString('zh-TW', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' 更新';
       }
       render(data);
     })
     .catch(e => {
-      // JS 現在只負責填文字，樣式由上面的 CSS 統一接管
       document.getElementById('lastUpdated').textContent = '預覽模式';
       
+      // 更新預覽用的假資料以觸發智能標籤
       rawData = [
-        {"IM PIC":"Alice", "狀態":"Executing", "產值指數": 860, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Bob", "狀態":"Executing", "產值指數": 610, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Charlie", "狀態":"Proposed", "產值指數": 450, "最新更新": new Date().toISOString()},
-        {"IM PIC":"David", "狀態":"Contacting", "產值指數": 280, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Eve", "狀態":"Brief", "產值指數": 150, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Frank", "狀態":"Closed", "產值指數": 100, "isArchive": true, "最新更新": new Date().toISOString()}
+        {"IM PIC":"Alice", "狀態":"Executing", "產值指數": 400, "執行網紅數": 25, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Alice", "狀態":"Proposed", "產值指數": 460, "提案網紅數": 20, "最新更新": new Date().toISOString()}, // Alice 均22人 -> 單案複雜
+        {"IM PIC":"Bob", "狀態":"Executing", "產值指數": 150, "執行網紅數": 5, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Bob", "狀態":"Executing", "產值指數": 120, "執行網紅數": 4, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Bob", "狀態":"Brief", "產值指數": 120, "提案網紅數": 5, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Bob", "狀態":"Contacting", "產值指數": 110, "提案網紅數": 3, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Bob", "狀態":"Proposed", "產值指數": 110, "提案網紅數": 4, "最新更新": new Date().toISOString()}, // Bob 5專案 均4人 -> 大量小案
+        {"IM PIC":"Charlie", "狀態":"Proposed", "產值指數": 450, "提案網紅數": 12, "最新更新": new Date().toISOString()},
+        {"IM PIC":"David", "狀態":"Contacting", "產值指數": 280, "提案網紅數": 8, "最新更新": new Date().toISOString()}
       ];
       render(rawData);
     });
