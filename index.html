@@ -634,7 +634,10 @@
   document.getElementById('closeGuideBtn').addEventListener('click', () => toggleSidebar(false));
   sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
 
-  fetch('data.json?v=' + Date.now())
+  // 請確認你的 GitHub 預設分支是 main 還是 master，這裡以 main 為例
+const githubRawUrl = 'https://raw.githubusercontent.com/oakleykuo-svg/im-dashboard/main/data.json';
+
+fetch(githubRawUrl + '?v=' + Date.now())
     .then(r => {
       if (!r.ok) throw new Error("Data file not found");
       return r.json();
