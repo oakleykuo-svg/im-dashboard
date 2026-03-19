@@ -197,7 +197,7 @@
     .legend-bar-fill { height: 100%; border-radius: 2px; transition: width 1s ease; }
 
     /* Leaderboard */
-    .leaderboard-card { padding: 16px 20px; }
+    .leaderboard-card { padding: 16px 20px; margin-bottom: 16px;}
     .lb-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
     .lb-title { font-size: 12px; font-weight: 800; letter-spacing: 0.08em; color: var(--text-primary); }
     .lb-sub { font-size: 10px; color: var(--text-muted); font-weight: 500; }
@@ -389,6 +389,19 @@
     </div>
   </div>
 
+  <!-- 新增：高 GP 案件矩陣圖 -->
+  <div class="card chart-card" style="margin-bottom: 16px;">
+    <div class="chart-header">
+      <div style="display:flex; flex-direction:column;">
+        <span class="chart-title" style="font-size: 13px;">高 GP 案件戰略矩陣圖 (ACTIVE)</span>
+        <span style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">一眼看穿專案含金量：越往右上方越是「高預算旗艦案」，右下角則是「吃力不討好」的警訊案。</span>
+      </div>
+    </div>
+    <div style="position: relative; height: 360px; width: 100%;">
+      <canvas id="matrixChart"></canvas>
+    </div>
+  </div>
+
   <div class="card leaderboard-card">
     <div class="lb-header">
       <span class="lb-title">IM CAPACITY ALLOCATION</span>
@@ -450,14 +463,22 @@
 
 <script>
   // 【重要】對應 Google Sheet 上的精確欄位名稱
-  const KEYS = { NAME: "IM PIC", STATUS: "狀態", SCORE: "產值指數", DATE: "最新更新", PROPOSED_KOL: "提案網紅數", EXEC_KOL: "執行網紅數" };
+  const KEYS = { 
+    NAME: "IM PIC", 
+    STATUS: "狀態", 
+    SCORE: "產值指數", 
+    DATE: "最新更新", 
+    PROPOSED_KOL: "提案網紅數", 
+    EXEC_KOL: "執行網紅數",
+    BUDGET: "預算" // 新增預算 KEY
+  };
   
   const STAGE_COLORS = { 'Executing':'#E14F4B','Contacting':'#D4820A','Proposed':'#2B72C8','Brief':'#7C5CBF','Closed':'#1B9E5A','Lost':'#C0BBB4' };
   const STAGE_ORDER = ['Executing','Contacting','Proposed','Brief','Closed','Lost'];
   const PALETTE = ['#E14F4B','#2B72C8','#7C5CBF','#1B9E5A','#D4820A','#888888'];
   const THRESHOLD = 800;
 
-  let rawData=[], currentFilter='week', mChart=null, sChart=null;
+  let rawData=[], currentFilter='week', mChart=null, sChart=null, matrixChartInstance=null;
 
   function filterData(data) {
     if (currentFilter==='all') return data;
@@ -564,6 +585,139 @@
       <div class="legend-bar-track"><div class="legend-bar-fill" style="background:${sC[i]}99;width:${Math.round(sV[i]/totalS*100)}%"></div></div>
     `).join('');
 
+    // ==========================================
+    // 🚀 新增：高 GP 案件矩陣圖 (Scatter Plot)
+    // ==========================================
+    const scatterData = [];
+    data.forEach(item => {
+      const isArchive = item["isArchive"] === true;
+      const st = item[KEYS.STATUS];
+      
+      // 只看「還活著」且「已經有產值」的案子，過濾掉 Archive, Lost, Closed
+      if (!isArchive && st !== 'Lost' && st !== 'Closed') {
+        const pts = parseFloat(item[KEYS.SCORE]) || 0;
+        
+        // 【極簡化】既然已規範填寫純數字，直接將資料轉為浮點數即可。
+        // 若輸入非數字 (如 "TBC" 或空白)，parseFloat 會回傳 NaN，加上 || 0 會讓它變成 0。
+        const budget = parseFloat(item[KEYS.BUDGET]) || 0;
+
+        // 只要預算 > 0 且產值 > 0 就畫在圖上
+        if (budget > 0 && pts > 0) {
+          scatterData.push({
+            x: pts,             // X 軸：花了多少力氣 (產值)
+            y: budget,          // Y 軸：預算 (錢)
+            name: item["專案名稱"] || "未命名",
+            pic: item[KEYS.NAME] || "Unknown",
+            stage: st
+          });
+        }
+      }
+    });
+
+    // 取得舊圖表並銷毀 (避免重疊)
+    if(matrixChartInstance) matrixChartInstance.destroy();
+    
+    // 繪製新圖表
+    matrixChartInstance = new Chart(document.getElementById('matrixChart').getContext('2d'), {
+      type: 'scatter',
+      data: {
+        datasets: [{
+          label: '活躍專案',
+          data: scatterData,
+          backgroundColor: 'rgba(225, 79, 75, 0.65)', // 品牌紅色半透明
+          borderColor: 'rgba(225, 79, 75, 1)',
+          borderWidth: 1,
+          pointRadius: 6,
+          pointHoverRadius: 9
+        }]
+      },
+      plugins: [{
+        id: 'quadrantBackgrounds',
+        beforeDraw(chart) {
+          const { ctx, chartArea: { left, top, right, bottom } } = chart;
+          
+          // 自動計算畫面的正中心作為十字分隔線
+          const xCenter = left + (right - left) / 2;
+          const yCenter = top + (bottom - top) / 2;
+          
+          ctx.save();
+          // 1. 左上 (金雞母區：低心力/高預算) - 淺金色
+          ctx.fillStyle = 'rgba(212, 130, 10, 0.05)';
+          ctx.fillRect(left, top, xCenter - left, yCenter - top);
+          
+          // 2. 右上 (正常健康區：高心力/高預算) - 淺藍色
+          ctx.fillStyle = 'rgba(43, 114, 200, 0.03)';
+          ctx.fillRect(xCenter, top, right - xCenter, yCenter - top);
+          
+          // 3. 左下 (正常健康區：低心力/低預算) - 淺綠色
+          ctx.fillStyle = 'rgba(27, 158, 90, 0.03)';
+          ctx.fillRect(left, yCenter, xCenter - left, bottom - yCenter);
+          
+          // 4. 右下 (心酸血淚區：高心力/低預算) - 淺紅色
+          ctx.fillStyle = 'rgba(225, 79, 75, 0.06)';
+          ctx.fillRect(xCenter, yCenter, right - xCenter, bottom - yCenter);
+
+          // 繪製象限文字浮水印
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.12)'; // 12% 透明度的黑色，避免蓋住資料點
+          ctx.font = 'bold 20px "DM Sans", sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          
+          ctx.fillText('👑 金雞母區', left + (xCenter - left) / 2, top + (yCenter - top) / 2);
+          ctx.fillText('🟢 正常 / 健康區', xCenter + (right - xCenter) / 2, top + (yCenter - top) / 2);
+          ctx.fillText('🟢 正常 / 健康區', left + (xCenter - left) / 2, yCenter + (bottom - yCenter) / 2);
+          ctx.fillText('🚨 心酸血淚區', xCenter + (right - xCenter) / 2, yCenter + (bottom - yCenter) / 2);
+          
+          ctx.restore();
+        }
+      }],
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(26, 24, 20, 0.9)',
+            titleFont: { size: 13 },
+            bodyFont: { size: 12 },
+            padding: 12,
+            callbacks: {
+              // 自訂 Tooltip，滑鼠移過去顯示詳細資訊
+              label: function(ctx) {
+                const d = ctx.raw;
+                return [
+                  `專案：${d.name}`,
+                  `負責人：${d.pic} (${d.stage})`,
+                  `預算：$${d.y.toLocaleString()}`,
+                  `量能消耗：${d.x} PTS`
+                ];
+              }
+            }
+          }
+        },
+        scales: {
+          x: { 
+            beginAtZero: true,
+            title: { display: true, text: '➔ 產值指數 (越往右，耗費心力越大)', color: '#AAA49D', font: { weight: 'bold' } },
+            grid: { color: 'rgba(0,0,0,0.04)' }
+          },
+          y: { 
+            beginAtZero: true,
+            title: { display: true, text: '➔ 案件預算 (越往上，營收越高)', color: '#AAA49D', font: { weight: 'bold' } },
+            grid: { color: 'rgba(0,0,0,0.04)' },
+            ticks: {
+              callback: function(value) {
+                // Y軸數字縮寫轉換為「萬」
+                return value >= 10000 ? (value / 10000) + ' 萬' : value;
+              }
+            }
+          }
+        }
+      }
+    });
+    // ==========================================
+
+
     const listEl = document.getElementById('memberList');
     listEl.innerHTML = '';
     sorted.forEach(([name, val], i) => {
@@ -631,9 +785,9 @@
   sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
 
   // 請確認你的 GitHub 預設分支是 main 還是 master，這裡以 main 為例
-const githubRawUrl = 'https://raw.githubusercontent.com/oakleykuo-svg/im-dashboard/main/data.json';
+  const githubRawUrl = 'https://raw.githubusercontent.com/oakleykuo-svg/im-dashboard/main/data.json';
 
-fetch(githubRawUrl + '?v=' + Date.now())
+  fetch(githubRawUrl + '?v=' + Date.now())
     .then(r => {
       if (!r.ok) throw new Error("Data file not found");
       return r.json();
@@ -650,17 +804,18 @@ fetch(githubRawUrl + '?v=' + Date.now())
     .catch(e => {
       document.getElementById('lastUpdated').textContent = '預覽模式';
       
-      // 更新預覽用的假資料以觸發智能標籤
+      // 更新預覽用的假資料以觸發智能標籤與散佈圖 (預算改為純數字)
       rawData = [
-        {"IM PIC":"Alice", "狀態":"Executing", "產值指數": 400, "執行網紅數": 25, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Alice", "狀態":"Proposed", "產值指數": 460, "提案網紅數": 20, "最新更新": new Date().toISOString()}, // Alice 均22人 -> 單案複雜
-        {"IM PIC":"Bob", "狀態":"Executing", "產值指數": 150, "執行網紅數": 5, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Bob", "狀態":"Executing", "產值指數": 120, "執行網紅數": 4, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Bob", "狀態":"Brief", "產值指數": 120, "提案網紅數": 5, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Bob", "狀態":"Contacting", "產值指數": 110, "提案網紅數": 3, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Bob", "狀態":"Proposed", "產值指數": 110, "提案網紅數": 4, "最新更新": new Date().toISOString()}, // Bob 5專案 均4人 -> 大量小案
-        {"IM PIC":"Charlie", "狀態":"Proposed", "產值指數": 450, "提案網紅數": 12, "最新更新": new Date().toISOString()},
-        {"IM PIC":"David", "狀態":"Contacting", "產值指數": 280, "提案網紅數": 8, "最新更新": new Date().toISOString()}
+        {"IM PIC":"Alice", "專案名稱":"品牌A旗艦", "狀態":"Executing", "產值指數": 480, "預算": 500000, "執行網紅數": 25, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Alice", "專案名稱":"品牌B金雞母", "狀態":"Proposed", "產值指數": 100, "預算": 850000, "提案網紅數": 20, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Bob", "專案名稱":"品牌C日常", "狀態":"Executing", "產值指數": 150, "預算": 80000, "執行網紅數": 5, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Bob", "專案名稱":"品牌D測試", "狀態":"Executing", "產值指數": 120, "預算": 50000, "執行網紅數": 4, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Bob", "專案名稱":"品牌E提案", "狀態":"Brief", "產值指數": 120, "預算": "TBC", "提案網紅數": 5, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Bob", "專案名稱":"品牌F溝通", "狀態":"Contacting", "產值指數": 110, "預算": 40000, "提案網紅數": 3, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Bob", "專案名稱":"品牌G小案", "狀態":"Proposed", "產值指數": 110, "預算": 30000, "提案網紅數": 4, "最新更新": new Date().toISOString()},
+        {"IM PIC":"Charlie", "專案名稱":"品牌H年度", "狀態":"Proposed", "產值指數": 450, "預算": 800000, "提案網紅數": 12, "最新更新": new Date().toISOString()},
+        {"IM PIC":"David", "專案名稱":"品牌I聯名", "狀態":"Contacting", "產值指數": 280, "預算": 150000, "提案網紅數": 8, "最新更新": new Date().toISOString()},
+        {"IM PIC":"David", "專案名稱":"品牌J心酸奧客案", "狀態":"Executing", "產值指數": 650, "預算": 50000, "執行網紅數": 35, "最新更新": new Date().toISOString()}
       ];
       render(filterData(rawData));
     });
