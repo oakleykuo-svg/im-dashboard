@@ -597,9 +597,9 @@
       if (!isArchive && st !== 'Lost' && st !== 'Closed') {
         const pts = parseFloat(item[KEYS.SCORE]) || 0;
         
-        // 【極簡化】既然已規範填寫純數字，直接將資料轉為浮點數即可。
-        // 若輸入非數字 (如 "TBC" 或空白)，parseFloat 會回傳 NaN，加上 || 0 會讓它變成 0。
-        const budget = parseFloat(item[KEYS.BUDGET]) || 0;
+        // 【防呆升級】預防有人手癢打了千分位逗號 (例如 "1,250,000")，自動將逗號拔除再轉換
+        const budgetRaw = String(item[KEYS.BUDGET] || '0').trim();
+        const budget = parseFloat(budgetRaw.replace(/,/g, '')) || 0;
 
         // 只要預算 > 0 且產值 > 0 就畫在圖上
         if (budget > 0 && pts > 0) {
