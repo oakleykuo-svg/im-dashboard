@@ -174,7 +174,7 @@
     .c-amber .kpi-val { color: var(--amber); }
     .c-green .kpi-val { color: var(--green); }
     .c-blue  .kpi-val { color: var(--blue);  }
-    .kpi-sub { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 6px; }
+    .kpi-sub { font-size: 10px; color: var(--text-muted); font-weight: 500; margin-top: 6px; display: flex; align-items: center; }
 
     /* Charts */
     .chart-row { display: grid; grid-template-columns: 1fr 280px; gap: 12px; margin-bottom: 16px; }
@@ -350,7 +350,7 @@
     <div class="card kpi-card c-brand">
       <div class="kpi-label">團隊總產值指數</div>
       <div class="kpi-val"><span id="kpiTotal">—</span><span class="kpi-unit">PTS</span></div>
-      <div class="kpi-sub">目前活躍案件總負荷</div>
+      <div class="kpi-sub" id="kpiTotalSub">目前活躍案件總負荷</div>
     </div>
     <div class="card kpi-card c-amber">
       <div class="kpi-label">執行中案件</div>
@@ -360,7 +360,7 @@
     <div class="card kpi-card c-green">
       <div class="kpi-label">平均每人負載</div>
       <div class="kpi-val"><span id="kpiAvg">—</span><span class="kpi-unit">PTS</span></div>
-      <div class="kpi-sub">活躍成員平均</div>
+      <div class="kpi-sub" id="kpiAvgSub">活躍成員平均</div>
     </div>
     <div class="card kpi-card c-blue">
       <div class="kpi-label">歷史累積專案</div>
@@ -372,7 +372,7 @@
   <div class="chart-row">
     <div class="card chart-card" style="display: flex; flex-direction: column;">
       <div class="chart-header">
-        <span class="chart-title">個人實質產值分佈 (Active)</span>
+        <span class="chart-title">個人實質量能分佈 (Active)</span>
         <span class="pill-badge" id="memberBadge">— members</span>
       </div>
       <div style="position: relative; flex: 1; min-height: 150px; width: 100%;">
@@ -393,7 +393,7 @@
   <div class="card chart-card" style="margin-bottom: 16px;">
     <div class="chart-header">
       <div style="display:flex; flex-direction:column;">
-        <span class="chart-title" style="font-size: 13px;">高 GP 案件戰略矩陣圖 (ACTIVE)</span>
+        <span class="chart-title" style="font-size: 13px;">案件GP矩陣圖 (Active)</span>
         <span style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">一眼看穿專案含金量：越往右上方越是「高預算旗艦案」，右下角則是「吃力不討好」的警訊案。</span>
       </div>
     </div>
@@ -411,7 +411,7 @@
   </div>
 
   <footer>
-    IM Capacity · Signal V5.7 &nbsp;·&nbsp; © AnyMind Group 2026_Oakley
+    IM Capacity · Signal V6.8 &nbsp;·&nbsp; © AnyMind Group 2026_Oakley
   </footer>
 </div>
 
@@ -545,6 +545,41 @@
     document.getElementById('memberBadge').textContent = mCount + ' 活躍成員';
     document.getElementById('stageBadge').textContent = data.length + ' 總專案量';
 
+    // ==========================================
+    // 💡 新增：自動判斷團隊健康狀態與動態標籤
+    // ==========================================
+    let avgStatusCls = 'ok';
+    let avgStatusText = 'AVAILABLE';
+    let avgStatusDesc = '產能充裕';
+
+    if (avg > 800) {
+      avgStatusCls = 'danger'; avgStatusText = 'OVERLOAD'; avgStatusDesc = '極限爆載';
+    } else if (avg > 600) {
+      avgStatusCls = 'warning'; avgStatusText = 'WARNING'; avgStatusDesc = '高壓警戒';
+    } else if (avg > 300) {
+      avgStatusCls = 'ok'; avgStatusText = 'HEALTHY'; avgStatusDesc = '黃金比例';
+    } else {
+      avgStatusCls = 'ok'; avgStatusText = 'AVAILABLE'; avgStatusDesc = '產能充裕';
+    }
+
+    // 計算團隊總編制極限 (活躍人數 * 800)
+    const teamMaxCapacity = mCount * THRESHOLD;
+    const teamLoadPct = teamMaxCapacity > 0 ? Math.round((totalLoad / teamMaxCapacity) * 100) : 0;
+
+    // 渲染 KPI 1 的子標籤
+    document.getElementById('kpiTotalSub').innerHTML = `
+      <span class="status-chip chip-${avgStatusCls}" style="margin-right: 6px;">${avgStatusText}</span>
+      目前上限 ${teamMaxCapacity} PTS (負載率 ${teamLoadPct}%)
+    `;
+
+    // 渲染 KPI 2 的子標籤
+    document.getElementById('kpiAvgSub').innerHTML = `
+      <span class="status-chip chip-${avgStatusCls}" style="margin-right: 6px;">${avgStatusText}</span>
+      整體評估：${avgStatusDesc}
+    `;
+    // ==========================================
+
+
     const sorted = Object.entries(members).sort((a,b) => b[1].score - a[1].score);
     const labels = sorted.map(([n]) => n);
     const vals = sorted.map(([,v]) => Math.round(v.score));
@@ -596,10 +631,7 @@
       // 只看「還活著」且「已經有產值」的案子，過濾掉 Archive, Lost, Closed
       if (!isArchive && st !== 'Lost' && st !== 'Closed') {
         const pts = parseFloat(item[KEYS.SCORE]) || 0;
-        
-        // 【防呆升級】預防有人手癢打了千分位逗號 (例如 "1,250,000")，自動將逗號拔除再轉換
-        const budgetRaw = String(item[KEYS.BUDGET] || '0').trim();
-        const budget = parseFloat(budgetRaw.replace(/,/g, '')) || 0;
+        const budget = parseFloat(item[KEYS.BUDGET]) || 0;
 
         // 只要預算 > 0 且產值 > 0 就畫在圖上
         if (budget > 0 && pts > 0) {
@@ -804,7 +836,7 @@
     .catch(e => {
       document.getElementById('lastUpdated').textContent = '預覽模式';
       
-      // 更新預覽用的假資料以觸發智能標籤與散佈圖 (預算改為純數字)
+      // 更新預覽用的假資料以觸發智能標籤與散佈圖
       rawData = [
         {"IM PIC":"Alice", "專案名稱":"品牌A旗艦", "狀態":"Executing", "產值指數": 480, "預算": 500000, "執行網紅數": 25, "最新更新": new Date().toISOString()},
         {"IM PIC":"Alice", "專案名稱":"品牌B金雞母", "狀態":"Proposed", "產值指數": 100, "預算": 850000, "提案網紅數": 20, "最新更新": new Date().toISOString()},
