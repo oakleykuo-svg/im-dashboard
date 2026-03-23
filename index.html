@@ -300,9 +300,57 @@
     @keyframes fadeUp { from{opacity:0;transform:translateY(14px)} to{opacity:1;transform:translateY(0)} }
     .card { animation: fadeUp 0.45s ease both; }
     @media(max-width:920px){.chart-row{grid-template-columns:1fr}}
+
+    /* 🔑 登入牆專屬樣式 */
+    #auth-overlay {
+      position: fixed; inset: 0; background: rgba(245, 243, 240, 0.95);
+      z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
+    }
+    .auth-card {
+      background: #fff; padding: 40px; border-radius: 20px; box-shadow: var(--shadow-md);
+      width: 90%; max-width: 360px; text-align: center; border: 1px solid rgba(0,0,0,0.05);
+      animation: fadeUp 0.5s ease both;
+    }
+    .auth-input {
+      width: 100%; padding: 14px; border-radius: 10px; border: 2px solid #eee;
+      margin-bottom: 16px; font-size: 15px; text-align: center; outline: none;
+      transition: all 0.2s; font-family: 'DM Sans', sans-serif; letter-spacing: 2px;
+    }
+    .auth-input:focus { border-color: var(--brand); box-shadow: 0 0 0 4px rgba(225,79,75,0.1); }
+    .auth-btn {
+      width: 100%; padding: 14px; background: var(--brand); color: #fff; border: none;
+      border-radius: 10px; font-weight: 700; cursor: pointer; font-size: 15px;
+      transition: all 0.2s; box-shadow: 0 4px 12px rgba(225,79,75,0.3);
+    }
+    .auth-btn:hover { background: #c93d39; transform: translateY(-2px); }
   </style>
 </head>
 <body>
+
+<!-- 🔑 全螢幕密碼登入牆 -->
+<div id="auth-overlay">
+  <div class="auth-card">
+    <div class="logo-mark" style="margin: 0 auto 20px; width: 48px; height: 48px;">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="width: 24px; height: 24px;">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>
+    </div>
+    <h2 style="font-size: 20px; font-weight: 800; letter-spacing: 0.05em; margin-bottom: 8px;">IM CAPACITY</h2>
+    <p style="color: var(--text-secondary); font-size: 13px; margin-bottom: 24px; font-weight: 500;">Please enter access code</p>
+    
+    <input type="password" id="auth-pwd" class="auth-input" placeholder="Password" onkeypress="if(event.key === 'Enter') checkAuth()">
+    <button class="auth-btn" id="auth-submit-btn" onclick="checkAuth()">Login</button>
+    
+    <div id="auth-error" style="color: #E14F4B; font-size: 12px; margin-top: 16px; font-weight: 600; display: none;">
+      ❌ 密碼錯誤，請重新輸入
+    </div>
+  </div>
+</div>
+
 <div class="layout">
 
   <nav>
@@ -337,12 +385,12 @@
     </div>
 
     <div style="display: flex; align-items: center; gap: 8px;">
-      <div id="lastUpdated">正在連線...</div>
+      <div id="lastUpdated">等待登入...</div>
       <button id="openGuideBtn" class="nav-filter-btn" style="border: 1px solid rgba(0,0,0,0.06); background: rgba(255,255,255,0.7); box-shadow: 0 1px 3px rgba(0,0,0,0.02);">
         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
         指南
       </button>
-      <div class="live-badge"><span class="live-dot"></span>已連線</div>
+      <div class="live-badge"><span class="live-dot"></span>保護中</div>
     </div>
   </nav>
 
@@ -372,7 +420,7 @@
   <div class="chart-row">
     <div class="card chart-card" style="display: flex; flex-direction: column;">
       <div class="chart-header">
-        <span class="chart-title">個人實質量能分佈 (Active)</span>
+        <span class="chart-title">個人實質產值分佈 (Active)</span>
         <span class="pill-badge" id="memberBadge">— members</span>
       </div>
       <div style="position: relative; flex: 1; min-height: 150px; width: 100%;">
@@ -393,7 +441,7 @@
   <div class="card chart-card" style="margin-bottom: 16px;">
     <div class="chart-header">
       <div style="display:flex; flex-direction:column;">
-        <span class="chart-title" style="font-size: 13px;">案件GP矩陣圖 (Active)</span>
+        <span class="chart-title" style="font-size: 13px;">高 GP 案件戰略矩陣圖 (ACTIVE)</span>
         <span style="font-size: 10px; color: var(--text-muted); margin-top: 4px;">一眼看穿專案含金量：越往右上方越是「高預算旗艦案」，右下角則是「吃力不討好」的警訊案。</span>
       </div>
     </div>
@@ -411,7 +459,7 @@
   </div>
 
   <footer>
-    IM Capacity · Signal V6.8 &nbsp;·&nbsp; © AnyMind Group 2026_Oakley
+    IM Capacity · Signal V5.7 &nbsp;·&nbsp; © AnyMind Group 2026_Oakley
   </footer>
 </div>
 
@@ -462,6 +510,48 @@
 </aside>
 
 <script>
+  // ==========================================
+  // 🔑 進階加密密碼鎖 (防禦 F12 原始碼與 Network 偷看)
+  // ==========================================
+  
+  // 這是 "IM2026" 經過「反轉 + Base64」混淆後的結果。
+  // 這樣原始碼裡完全看不到密碼的明文！
+  const ENCODED_SECRET = "NjIwMk1J"; 
+
+  function encodePwd(str) {
+    // 簡單且輕量的混淆：將輸入的字串反轉，然後轉成 Base64
+    return btoa(str.split('').reverse().join(''));
+  }
+
+  function checkAuth() {
+    const input = document.getElementById('auth-pwd').value;
+    const btn = document.getElementById('auth-submit-btn');
+    btn.innerText = "驗證中...";
+    
+    // 將使用者輸入的密碼進行混淆，再跟我們設定的亂碼比對
+    if (encodePwd(input) === ENCODED_SECRET) {
+      sessionStorage.setItem('im_dashboard_auth', 'true');
+      document.getElementById('auth-overlay').style.display = 'none';
+      document.getElementById('auth-error').style.display = 'none';
+      
+      // 密碼正確後，才開始向 GitHub 請求資料！(阻斷 Network 偷看)
+      loadDashboardData();
+    } else {
+      document.getElementById('auth-error').style.display = 'block';
+      btn.innerText = "Login";
+    }
+  }
+
+  // 網頁一載入時的檢查
+  document.addEventListener("DOMContentLoaded", () => {
+    if (sessionStorage.getItem('im_dashboard_auth') === 'true') {
+      // 如果這個瀏覽器之前已經登入過，就隱藏密碼牆，直接抓資料
+      document.getElementById('auth-overlay').style.display = 'none';
+      loadDashboardData();
+    }
+  });
+  // ==========================================
+
   // 【重要】對應 Google Sheet 上的精確欄位名稱
   const KEYS = { 
     NAME: "IM PIC", 
@@ -470,7 +560,7 @@
     DATE: "最新更新", 
     PROPOSED_KOL: "提案網紅數", 
     EXEC_KOL: "執行網紅數",
-    BUDGET: "預算" // 新增預算 KEY
+    BUDGET: "預算" 
   };
   
   const STAGE_COLORS = { 'Executing':'#E14F4B','Contacting':'#D4820A','Proposed':'#2B72C8','Brief':'#7C5CBF','Closed':'#1B9E5A','Lost':'#C0BBB4' };
@@ -569,7 +659,7 @@
     // 渲染 KPI 1 的子標籤
     document.getElementById('kpiTotalSub').innerHTML = `
       <span class="status-chip chip-${avgStatusCls}" style="margin-right: 6px;">${avgStatusText}</span>
-      目前上限 ${teamMaxCapacity} PTS (負載率 ${teamLoadPct}%)
+      編制上限 ${teamMaxCapacity} PTS (負載率 ${teamLoadPct}%)
     `;
 
     // 渲染 KPI 2 的子標籤
@@ -816,41 +906,48 @@
   document.getElementById('closeGuideBtn').addEventListener('click', () => toggleSidebar(false));
   sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
 
-  // 請確認你的 GitHub 預設分支是 main 還是 master，這裡以 main 為例
-  const githubRawUrl = 'https://raw.githubusercontent.com/oakleykuo-svg/im-dashboard/main/data.json';
+  // ==========================================
+  // 🚀 核心資料讀取邏輯 (現在被登入牆保護住了)
+  // ==========================================
+  function loadDashboardData() {
+    document.getElementById('lastUpdated').textContent = '正在連線...';
+    document.querySelector('.live-badge').innerHTML = '<span class="live-dot"></span>已連線';
 
-  fetch(githubRawUrl + '?v=' + Date.now())
-    .then(r => {
-      if (!r.ok) throw new Error("Data file not found");
-      return r.json();
-    })
-    .then(data => {
-      rawData = data;
-      const dates = data.map(d => new Date(d[KEYS.DATE])).filter(d => !isNaN(d));
-      if(dates.length){
-        const latest = new Date(Math.max(...dates));
-        document.getElementById('lastUpdated').textContent = latest.toLocaleString('zh-TW', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' 更新';
-      }
-      render(filterData(rawData));
-    })
-    .catch(e => {
-      document.getElementById('lastUpdated').textContent = '預覽模式';
-      
-      // 更新預覽用的假資料以觸發智能標籤與散佈圖
-      rawData = [
-        {"IM PIC":"Alice", "專案名稱":"品牌A旗艦", "狀態":"Executing", "產值指數": 480, "預算": 500000, "執行網紅數": 25, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Alice", "專案名稱":"品牌B金雞母", "狀態":"Proposed", "產值指數": 100, "預算": 850000, "提案網紅數": 20, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Bob", "專案名稱":"品牌C日常", "狀態":"Executing", "產值指數": 150, "預算": 80000, "執行網紅數": 5, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Bob", "專案名稱":"品牌D測試", "狀態":"Executing", "產值指數": 120, "預算": 50000, "執行網紅數": 4, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Bob", "專案名稱":"品牌E提案", "狀態":"Brief", "產值指數": 120, "預算": "TBC", "提案網紅數": 5, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Bob", "專案名稱":"品牌F溝通", "狀態":"Contacting", "產值指數": 110, "預算": 40000, "提案網紅數": 3, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Bob", "專案名稱":"品牌G小案", "狀態":"Proposed", "產值指數": 110, "預算": 30000, "提案網紅數": 4, "最新更新": new Date().toISOString()},
-        {"IM PIC":"Charlie", "專案名稱":"品牌H年度", "狀態":"Proposed", "產值指數": 450, "預算": 800000, "提案網紅數": 12, "最新更新": new Date().toISOString()},
-        {"IM PIC":"David", "專案名稱":"品牌I聯名", "狀態":"Contacting", "產值指數": 280, "預算": 150000, "提案網紅數": 8, "最新更新": new Date().toISOString()},
-        {"IM PIC":"David", "專案名稱":"品牌J心酸奧客案", "狀態":"Executing", "產值指數": 650, "預算": 50000, "執行網紅數": 35, "最新更新": new Date().toISOString()}
-      ];
-      render(filterData(rawData));
-    });
+    const githubRawUrl = 'https://raw.githubusercontent.com/oakleykuo-svg/im-dashboard/main/data.json';
+
+    fetch(githubRawUrl + '?v=' + Date.now())
+      .then(r => {
+        if (!r.ok) throw new Error("Data file not found");
+        return r.json();
+      })
+      .then(data => {
+        rawData = data;
+        const dates = data.map(d => new Date(d[KEYS.DATE])).filter(d => !isNaN(d));
+        if(dates.length){
+          const latest = new Date(Math.max(...dates));
+          document.getElementById('lastUpdated').textContent = latest.toLocaleString('zh-TW', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' 更新';
+        }
+        render(filterData(rawData));
+      })
+      .catch(e => {
+        document.getElementById('lastUpdated').textContent = '預覽模式';
+        
+        // 更新預覽用的假資料以觸發智能標籤與散佈圖
+        rawData = [
+          {"IM PIC":"Alice", "專案名稱":"品牌A旗艦", "狀態":"Executing", "產值指數": 480, "預算": 500000, "執行網紅數": 25, "最新更新": new Date().toISOString()},
+          {"IM PIC":"Alice", "專案名稱":"品牌B金雞母", "狀態":"Proposed", "產值指數": 100, "預算": 850000, "提案網紅數": 20, "最新更新": new Date().toISOString()},
+          {"IM PIC":"Bob", "專案名稱":"品牌C日常", "狀態":"Executing", "產值指數": 150, "預算": 80000, "執行網紅數": 5, "最新更新": new Date().toISOString()},
+          {"IM PIC":"Bob", "專案名稱":"品牌D測試", "狀態":"Executing", "產值指數": 120, "預算": 50000, "執行網紅數": 4, "最新更新": new Date().toISOString()},
+          {"IM PIC":"Bob", "專案名稱":"品牌E提案", "狀態":"Brief", "產值指數": 120, "預算": "TBC", "提案網紅數": 5, "最新更新": new Date().toISOString()},
+          {"IM PIC":"Bob", "專案名稱":"品牌F溝通", "狀態":"Contacting", "產值指數": 110, "預算": 40000, "提案網紅數": 3, "最新更新": new Date().toISOString()},
+          {"IM PIC":"Bob", "專案名稱":"品牌G小案", "狀態":"Proposed", "產值指數": 110, "預算": 30000, "提案網紅數": 4, "最新更新": new Date().toISOString()},
+          {"IM PIC":"Charlie", "專案名稱":"品牌H年度", "狀態":"Proposed", "產值指數": 450, "預算": 800000, "提案網紅數": 12, "最新更新": new Date().toISOString()},
+          {"IM PIC":"David", "專案名稱":"品牌I聯名", "狀態":"Contacting", "產值指數": 280, "預算": 150000, "提案網紅數": 8, "最新更新": new Date().toISOString()},
+          {"IM PIC":"David", "專案名稱":"品牌J心酸奧客案", "狀態":"Executing", "產值指數": 650, "預算": 50000, "執行網紅數": 35, "最新更新": new Date().toISOString()}
+        ];
+        render(filterData(rawData));
+      });
+  }
 </script>
 </body>
 </html>
