@@ -571,16 +571,28 @@
   let rawData=[], currentFilter='week', mChart=null, sChart=null, matrixChartInstance=null;
 
   function filterData(data) {
-    if (currentFilter==='all') return data;
+    if (currentFilter === 'all') return data;
     const now = new Date();
+    
     return data.filter(item => {
+      // 優先抓取「最新更新」，沒有的話才抓「需求時間」
       const dStr = item[KEYS.DATE] || item['需求時間'];
       const d = new Date(dStr);
       if (isNaN(d)) return false;
-      if (currentFilter==='week') { const w=new Date(now); w.setDate(now.getDate()-7); return d>=w; }
-      if (currentFilter==='month') return d.getFullYear()===now.getFullYear()&&d.getMonth()===now.getMonth();
-      if (currentFilter==='quarter') { const q=Math.floor(now.getMonth()/3); return d.getFullYear()===now.getFullYear()&&Math.floor(d.getMonth()/3)===q; }
-      return true;
+
+      // 統一改為「滾動天數」邏輯 (Rolling Days)
+      const pastDate = new Date(now);
+      
+      if (currentFilter === 'week') {
+        pastDate.setDate(now.getDate() - 7);   // 過去 7 天
+      } else if (currentFilter === 'month') {
+        pastDate.setDate(now.getDate() - 30);  // 過去 30 天
+      } else if (currentFilter === 'quarter') {
+        pastDate.setDate(now.getDate() - 90);  // 過去 90 天
+      }
+      
+      // 只要案件的更新日期 >= 我們設定的過去時間，就顯示出來
+      return d >= pastDate; 
     });
   }
 
