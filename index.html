@@ -813,23 +813,37 @@
         id: 'quadrantBackgrounds',
         beforeDraw(chart) {
           const { ctx, chartArea: { left, top, right, bottom } } = chart;
-          const xCenter = left + (right - left) / 2;
-          const yCenter = top + (bottom - top) / 2;
-          ctx.save();
-          // 1. 繪製四象限底色
-          ctx.fillStyle = 'rgba(212, 130, 10, 0.05)'; ctx.fillRect(left, top, xCenter - left, yCenter - top); // 左上
-          ctx.fillStyle = 'rgba(43, 114, 200, 0.03)'; ctx.fillRect(xCenter, top, right - xCenter, yCenter - top); // 右上
-          ctx.fillStyle = 'rgba(27, 158, 90, 0.03)';  ctx.fillRect(left, yCenter, xCenter - left, bottom - yCenter); // 左下
-          ctx.fillStyle = 'rgba(225, 79, 75, 0.06)';  ctx.fillRect(xCenter, yCenter, right - xCenter, bottom - yCenter); // 右下
+          const xMid = left + (right - left) / 2;
+          const yMid = top + (bottom - top) / 2;
           
-          // 2. 繪製區域名稱文字
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
-          ctx.font = 'bold 15px "DM Sans"';
+          ctx.save();
+          // 1. 繪製四象限底色 (維持原樣)
+          ctx.fillStyle = 'rgba(212, 130, 10, 0.05)'; ctx.fillRect(left, top, xMid - left, yMid - top); // 左上
+          ctx.fillStyle = 'rgba(43, 114, 200, 0.03)'; ctx.fillRect(xMid, top, right - xMid, yMid - top); // 右上
+          ctx.fillStyle = 'rgba(27, 158, 90, 0.03)';  ctx.fillRect(left, yMid, xMid - left, bottom - yMid); // 左下
+          ctx.fillStyle = 'rgba(225, 79, 75, 0.06)';  ctx.fillRect(xMid, yMid, right - xMid, bottom - yMid); // 右下
+          
+          // 2. 繪製區域名稱文字 (精準置中)
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.1)'; // 降低一點透明度更高級
+          ctx.font = 'bold 19px "DM Sans"'; // 放大字體
           ctx.textAlign = 'center';
-          ctx.fillText('👑 金雞母區', left + (xCenter - left) / 2, top + 25);
-          ctx.fillText('🚨 辛酸血淚區', xCenter + (right - xCenter) / 2, bottom - 15);
-          ctx.fillText('🟢 正常健康區', xCenter + (right - xCenter) / 2, top + 25);
-          ctx.fillText('🟢 正常健康區', left + (xCenter - left) / 2, bottom - 15);
+          ctx.textBaseline = 'middle'; // 垂直也置中
+
+          // 計算四個象限的中心點
+          const q1X = left + (xMid - left) / 2;
+          const q1Y = top + (yMid - top) / 2;
+          const q2X = xMid + (right - xMid) / 2;
+          const q2Y = top + (yMid - top) / 2;
+          const q3X = left + (xMid - left) / 2;
+          const q3Y = yMid + (bottom - yMid) / 2;
+          const q4X = xMid + (right - xMid) / 2;
+          const q4Y = yMid + (bottom - yMid) / 2;
+
+          ctx.fillText('👑 金雞母區', q1X, q1Y);
+          ctx.fillText('🟢 正常健康區', q2X, q2Y);
+          ctx.fillText('🟢 正常健康區', q3X, q3Y);
+          ctx.fillText('🚨 辛酸血淚區', q4X, q4Y);
+          
           ctx.restore();
         }
       }],
@@ -838,8 +852,8 @@
         maintainAspectRatio: false, 
         plugins: { legend: { display: false } },
         scales: {
-          x: { beginAtZero: true, title: { display: true, text: '➔ 量能消耗 (PTS)', font: { size: 10, weight: 'bold' } } },
-          y: { beginAtZero: true, title: { display: true, text: '➔ 專案預算 ($)', font: { size: 10, weight: 'bold' } } }
+          x: { beginAtZero: true, title: { display: true, text: '➔ 量能消耗 (PTS)', font: { size: 11, weight: 'bold' } }, grid: { color: 'rgba(0,0,0,0.03)' } },
+          y: { beginAtZero: true, title: { display: true, text: '➔ 專案預算 ($)', font: { size: 11, weight: 'bold' } }, grid: { color: 'rgba(0,0,0,0.03)' } }
         }
       }
     });
