@@ -518,8 +518,8 @@
 </aside>
 
 <script>
-  // ==========================================
-  // 🔑 進階加密密碼鎖 (防禦 F12 原始碼與 Network 偷看)
+// ==========================================
+  // 🔑 進階加密密碼鎖
   // ==========================================
   const ENCODED_SECRET = "NjIwMk1J"; 
 
@@ -564,8 +564,29 @@
   let rawData=[], currentFilter='week', isHistoryMode=false;
   let mChart=null, sChart=null, matrixChartInstance=null;
 
+  // ✨ 新增：數字跳動動畫函數 (修復 countUp is not defined)
+  function animateValue(el, val) {
+    if(!el) return;
+    const num = parseFloat(val) || 0;
+    // 使用 CountUp.js 官方語法
+    const demo = new countUp.CountUp(el, num, { duration: 2, separator: ',' });
+    if (!demo.error) { demo.start(); } 
+    else { el.innerText = Math.round(num).toLocaleString(); }
+  }
+
+  // ✨ 新增：規格解析工具 (修復 calculateSpecWeight is not defined)
+  function calculateSpecWeight(contentStr) {
+    if (!contentStr || typeof contentStr !== 'string') return 1; 
+    let weight = 0;
+    let s = contentStr.toLowerCase(); 
+    if (s.match(/podcast|igs|限動|動態|seeding/)) weight += 0.5;
+    if (s.match(/圖文|貼文|照片|reel|短影音|短片|短影|thread|yt|youtube|影片|直播|live/)) weight += 1.0;
+    if (s.match(/出席|實體|活動|到場|櫃點|門市|開團|團購|分潤/)) weight += 1.5;      
+    return weight === 0 ? 1 : weight; 
+  }
+
   // ==========================================
-  // 🕒 模式切換邏輯 (Active vs History)
+  // 🕒 模式切換邏輯
   // ==========================================
   document.getElementById('modeToggleBtn').addEventListener('click', () => {
     isHistoryMode = !isHistoryMode;
@@ -576,27 +597,21 @@
       btn.style.borderColor = 'var(--brand)'; btn.style.color = 'var(--brand)';
       document.getElementById('filterGroup').style.display = 'none';
       document.getElementById('historyControls').style.display = 'flex';
-      
       document.getElementById('chart1-title').innerText = "歷史結案產值總和 (ARCHIVED)";
       document.getElementById('chart3-title').innerText = "歷史結案戰略矩陣圖 (CLOSED)";
-      document.getElementById('chart3-sub').innerText = "回顧該區間內已成功結案的案子，判斷哪些是過去的金雞母。";
       document.getElementById('lb-sub-desc').innerText = "已解鎖 Archive 資料，並涵蓋已離職成員的歷史戰績。";
-      
     } else {
       btn.innerHTML = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> 歷史洞察';
       btn.style.borderColor = 'rgba(124,92,191,0.4)'; btn.style.color = 'var(--purple)';
       document.getElementById('filterGroup').style.display = 'flex';
       document.getElementById('historyControls').style.display = 'none';
-      
       document.getElementById('chart1-title').innerText = "個人實質產值分佈 (ACTIVE)";
       document.getElementById('chart3-title').innerText = "高 GP 案件戰略矩陣圖 (ACTIVE)";
-      document.getElementById('chart3-sub').innerText = "一眼看穿專案含金量：越往右上方越是「高預算旗艦案」，右下角則是「吃力不討好」的警訊案。";
       document.getElementById('lb-sub-desc').innerText = "數據已排除歸檔案件，顯示當前真實壓力。";
     }
     render(filterData(rawData));
   });
 
-  // 綁定歷史下拉選單事件
   document.getElementById('yearSelect').addEventListener('change', () => render(filterData(rawData)));
   document.getElementById('periodSelect').addEventListener('change', () => render(filterData(rawData)));
 
@@ -610,19 +625,16 @@
   });
 
   // ==========================================
-  // 🧠 資料過濾核心邏輯 (加入 2026 時間結界)
+  // 🧠 資料過濾核心邏輯
   // ==========================================
   function filterData(data) {
-    // 🛡️ 時間結界：任何 2025 (含) 以前的案子，直接濾掉不看
     const MIN_YEAR = 2026;
 
     if (!isHistoryMode) {
-      // --- 活躍模式 (滾動天數) ---
       const now = new Date();
       return data.filter(item => {
         const dStr = item[KEYS.DATE] || item['需求時間'];
         const d = new Date(dStr);
-        // 如果日期無效，或是年份小於 2026，直接淘汰
         if (isNaN(d) || d.getFullYear() < MIN_YEAR) return false;
 
         const pastDate = new Date(now);
@@ -633,7 +645,6 @@
         return d >= pastDate; 
       });
     } else {
-      // --- 歷史洞察模式 (絕對年份/季) ---
       let y = parseInt(document.getElementById('yearSelect').value);
       let p = document.getElementById('periodSelect').value;
       
@@ -644,11 +655,9 @@
 
         const dStr = item[KEYS.DATE] || item['需求時間'];
         const d = new Date(dStr);
-        
-        // 如果日期無效、年份不是選單選的年份、或是小於 2026，直接淘汰
         if (isNaN(d) || d.getFullYear() !== y || d.getFullYear() < MIN_YEAR) return false;
 
-        const m = d.getMonth() + 1; // 1-12 月
+        const m = d.getMonth() + 1;
         if (p === 'h1' && m > 6) return false;
         if (p === 'h2' && m < 7) return false;
         if (p === 'q1' && m > 3) return false;
@@ -677,7 +686,6 @@
       let k = parseInt((st === 'Executing' || st === 'Closed') ? (item[KEYS.EXEC_KOL] || item[KEYS.PROPOSED_KOL]) : (item[KEYS.PROPOSED_KOL] || item[KEYS.EXEC_KOL])) || 0;
       
       if (!isHistoryMode) {
-        // --- [活躍模式] ---
         if (!isArchive && st !== 'Lost' && st !== 'Closed') {
           totalLoad += s;
           if(st === 'Executing') exCount++;
@@ -688,17 +696,11 @@
         }
         stages[st] = (stages[st] || 0) + 1;
       } else {
-        // --- [歷史模式] ---
-        
-        // 🚨 修復 1：還原 Closed 案件的「滿血產值」
         if (st === 'Closed') {
-          // 動態抓取規格數與特殊狀況
           let specVal = parseFloat(item["操作規格數"]);
           if (isNaN(specVal)) specVal = calculateSpecWeight(item["操作內容"] || "");
           const special = item["特殊狀況"] || "";
           let multiplier = special.includes("急件") ? 1.5 : (special.includes("溝通成本高") ? 2.0 : 1.0);
-
-          // 以 Executing 的健康權重 (4.0) 重新計算該案的實質交付價值
           let trueDeliveredScore = 4.0 * k * specVal * multiplier;
           
           totalLoad += trueDeliveredScore;
@@ -708,13 +710,8 @@
           members[n].count++;
           members[n].kolCount += k;
         }
-
-        // 🚨 修復 2：過濾圓餅圖的「殭屍案」
         let displayStage = st;
-        // 如果是在 Archive 裡，但狀態卻不是 Closed 或 Lost，一律視為超過 21 天的「逾期歸檔」
-        if (isArchive && st !== 'Closed' && st !== 'Lost') {
-          displayStage = 'Expired (逾期歸檔)';
-        }
+        if (isArchive && st !== 'Closed' && st !== 'Lost') { displayStage = 'Expired (逾期歸檔)'; }
         stages[displayStage] = (stages[displayStage] || 0) + 1;
       }
     });
@@ -722,15 +719,16 @@
     const mCount = Object.keys(members).length;
     const avg = mCount ? Math.round(totalLoad/mCount) : 0;
 
-    // --- KPI UI 切換邏輯 ---
+    // KPI UI 文字切換
     document.getElementById('kpi1-label').innerText = isHistoryMode ? "區間總交付產值" : "團隊總產值指數";
     document.getElementById('kpi2-label').innerText = isHistoryMode ? "區間成功結案數" : "執行中案件";
     document.getElementById('kpi3-label').innerText = isHistoryMode ? "區間平均每人交付" : "平均每人負載";
     document.getElementById('kpi4-label').innerText = isHistoryMode ? "區間流局率" : "歷史累積專案";
 
-    countUp(document.getElementById('kpiTotal'), Math.round(totalLoad));
-    countUp(document.getElementById('kpiExecuting'), exCount);
-    countUp(document.getElementById('kpiAvg'), avg);
+    // ✨ 修正：使用 animateValue 而不是 countUp
+    animateValue(document.getElementById('kpiTotal'), totalLoad);
+    animateValue(document.getElementById('kpiExecuting'), exCount);
+    animateValue(document.getElementById('kpiAvg'), avg);
 
     if (isHistoryMode) {
       let lostCount = stages['Lost'] || 0;
@@ -738,65 +736,36 @@
       let totalResolved = lostCount + closedCount;
       let lostRate = totalResolved > 0 ? Math.round((lostCount / totalResolved) * 100) : 0;
       
-      countUp(document.getElementById('kpiCount'), lostRate);
+      animateValue(document.getElementById('kpiCount'), lostRate);
       document.getElementById('kpi4-unit').innerText = "%";
-      document.getElementById('kpi4-sub').innerText = "流局數 / (結案+流局)";
-      document.getElementById('kpi2-sub').innerText = "該區間已順利結案";
-      
       document.getElementById('kpiTotalSub').innerHTML = `<span class="status-chip" style="background:rgba(124,92,191,0.1);color:var(--purple);border:1px solid rgba(124,92,191,0.2);margin-right:6px;">HISTORY</span> 總交付戰績`;
-      document.getElementById('kpiAvgSub').innerHTML = `包含已離職成員`;
-
-      const badge = document.getElementById('liveBadgeStatus');
-      badge.innerHTML = `<span class="live-dot" style="background:#7C5CBF;box-shadow:0 0 6px #7C5CBF;"></span>歷史模式`;
-      badge.style.color = '#7C5CBF'; badge.style.background = 'rgba(124,92,191,0.1)'; badge.style.borderColor = 'rgba(124,92,191,0.2)';
-      
       document.getElementById('memberBadge').textContent = mCount + ' 貢獻成員';
     } else {
-      countUp(document.getElementById('kpiCount'), data.length);
+      animateValue(document.getElementById('kpiCount'), data.length);
       document.getElementById('kpi4-unit').innerText = "件";
-      document.getElementById('kpi4-sub').innerText = "含已歸檔資料";
-      document.getElementById('kpi2-sub').innerText = "正在執行階段";
-      
-      // 健康燈號計算
       let avgStatusCls = avg > 800 ? 'danger' : (avg > 600 ? 'warning' : 'ok');
       let avgStatusText = avg > 800 ? 'OVERLOAD' : (avg > 600 ? 'WARNING' : (avg > 300 ? 'HEALTHY' : 'AVAILABLE'));
       let teamMaxCapacity = mCount * THRESHOLD;
       let teamLoadPct = teamMaxCapacity > 0 ? Math.round((totalLoad / teamMaxCapacity) * 100) : 0;
-
       document.getElementById('kpiTotalSub').innerHTML = `<span class="status-chip chip-${avgStatusCls}" style="margin-right: 6px;">${avgStatusText}</span> 編制上限 ${teamMaxCapacity} PTS (負載率 ${teamLoadPct}%)`;
-      document.getElementById('kpiAvgSub').innerHTML = `<span class="status-chip chip-${avgStatusCls}" style="margin-right: 6px;">${avgStatusText}</span> 整體評估：${avg > 600 ? '高壓警戒' : '產能充裕'}`;
-
-      const badge = document.getElementById('liveBadgeStatus');
-      badge.innerHTML = `<span class="live-dot"></span>保護中`;
-      badge.style.color = ''; badge.style.background = ''; badge.style.borderColor = '';
-
       document.getElementById('memberBadge').textContent = mCount + ' 活躍成員';
     }
 
     document.getElementById('stageBadge').textContent = data.length + ' 總案量';
 
-    // --- 長條圖繪製 ---
+    // 圖表繪製
     const sorted = Object.entries(members).sort((a,b) => b[1].score - a[1].score);
     const labels = sorted.map(([n]) => n);
     const vals = sorted.map(([,v]) => Math.round(v.score));
     const bCols = labels.map((_,i) => PALETTE[i % PALETTE.length]);
     
-    Chart.defaults.font.family = "'DM Sans', sans-serif";
     if(mChart) mChart.destroy();
     mChart = new Chart(document.getElementById('memberChart').getContext('2d'), {
       type: 'bar',
       data: { labels, datasets:[{ label:'產值指數', data:vals, backgroundColor: bCols.map(c=>c+'28'), borderColor: bCols, borderWidth:2, borderRadius:6 }]},
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: { legend: { display: false }, tooltip: { padding: 10, titleFont: { size: 13 }, bodyFont: { size: 12 } } },
-        scales: {
-          x: { grid: { display: false }, ticks: { font: { size: 10, weight: '600' } } },
-          y: { beginAtZero: true, grid: { color: 'rgba(0,0,0,0.05)' }, ticks: { font: { size: 10, weight: '600' } } }
-        }
-      }
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
     });
 
-    // --- 甜甜圈圖繪製 ---
     const sL = STAGE_ORDER.filter(s => stages[s]);
     const sV = sL.map(s => stages[s]);
     const sC = sL.map(s => STAGE_COLORS[s]);
@@ -804,7 +773,7 @@
     sChart = new Chart(document.getElementById('stageChart').getContext('2d'), {
       type: 'doughnut',
       data: { labels: sL, datasets: [{ data: sV, backgroundColor: sC.map(c=>c+'33'), borderColor: sC, borderWidth: 2 }]},
-      options: { cutout: '68%', plugins: { legend: { display: false }, tooltip: { titleFont: { size: 13 }, bodyFont: { size: 12 } } } }
+      options: { cutout: '68%', plugins: { legend: { display: false } } }
     });
 
     const totalS = sV.reduce((a,b) => a+b, 0);
@@ -816,79 +785,32 @@
       <div class="legend-bar-track"><div class="legend-bar-fill" style="background:${sC[i]}99;width:${Math.round(sV[i]/totalS*100)}%"></div></div>
     `).join('');
 
-    // --- 散佈圖繪製 (高 GP 戰略矩陣) ---
+    // 戰略矩陣
     const scatterData = [];
     data.forEach(item => {
-      const isArchive = item["isArchive"] === true;
       const st = item[KEYS.STATUS];
-      
-      let shouldDraw = false;
-      if (!isHistoryMode && !isArchive && st !== 'Lost' && st !== 'Closed') shouldDraw = true;
-      if (isHistoryMode && st === 'Closed') shouldDraw = true;
-
-      if (shouldDraw) {
+      if ((!isHistoryMode && st !== 'Lost' && st !== 'Closed' && !item.isArchive) || (isHistoryMode && st === 'Closed')) {
         const pts = parseFloat(item[KEYS.SCORE]) || 0;
         const budget = parseFloat(item[KEYS.BUDGET]) || 0;
-        if (budget > 0 && pts > 0) {
-          scatterData.push({ x: pts, y: budget, name: item["專案名稱"] || "未命名", pic: item[KEYS.NAME] || "Unknown", stage: st });
-        }
+        if (budget > 0 && pts > 0) scatterData.push({ x: pts, y: budget, name: item["專案名稱"] || "未命名", pic: item[KEYS.NAME] || "Unknown", stage: st });
       }
     });
 
     if(matrixChartInstance) matrixChartInstance.destroy();
     matrixChartInstance = new Chart(document.getElementById('matrixChart').getContext('2d'), {
       type: 'scatter',
-      data: { datasets: [{ label: '專案', data: scatterData, backgroundColor: isHistoryMode ? 'rgba(124,92,191,0.65)' : 'rgba(225, 79, 75, 0.65)', borderColor: isHistoryMode ? '#7C5CBF' : '#E14F4B', borderWidth: 1, pointRadius: 6, pointHoverRadius: 9 }] },
-      plugins: [{
-        id: 'quadrantBackgrounds',
-        beforeDraw(chart) {
-          const { ctx, chartArea: { left, top, right, bottom } } = chart;
-          const xCenter = left + (right - left) / 2;
-          const yCenter = top + (bottom - top) / 2;
-          ctx.save();
-          ctx.fillStyle = 'rgba(212, 130, 10, 0.05)'; ctx.fillRect(left, top, xCenter - left, yCenter - top);
-          ctx.fillStyle = 'rgba(43, 114, 200, 0.03)'; ctx.fillRect(xCenter, top, right - xCenter, yCenter - top);
-          ctx.fillStyle = 'rgba(27, 158, 90, 0.03)';  ctx.fillRect(left, yCenter, xCenter - left, bottom - yCenter);
-          ctx.fillStyle = 'rgba(225, 79, 75, 0.06)';  ctx.fillRect(xCenter, yCenter, right - xCenter, bottom - yCenter);
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.12)'; ctx.font = 'bold 20px "DM Sans", sans-serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-          ctx.fillText('👑 金雞母區', left + (xCenter - left) / 2, top + (yCenter - top) / 2);
-          ctx.fillText('🟢 正常 / 健康區', xCenter + (right - xCenter) / 2, top + (yCenter - top) / 2);
-          ctx.fillText('🟢 正常 / 健康區', left + (xCenter - left) / 2, yCenter + (bottom - yCenter) / 2);
-          ctx.fillText('🚨 心酸血淚區', xCenter + (right - xCenter) / 2, yCenter + (bottom - yCenter) / 2);
-          ctx.restore();
-        }
-      }],
-      options: {
-        responsive: true, maintainAspectRatio: false,
-        plugins: {
-          legend: { display: false },
-          tooltip: {
-            backgroundColor: 'rgba(26, 24, 20, 0.9)', titleFont: { size: 13 }, bodyFont: { size: 12 }, padding: 12,
-            callbacks: { label: function(ctx) { const d = ctx.raw; return [ `專案：${d.name}`, `負責人：${d.pic} (${d.stage})`, `預算：$${d.y.toLocaleString()}`, `量能消耗：${d.x} PTS` ]; } }
-          }
-        },
-        scales: {
-          x: { beginAtZero: true, title: { display: true, text: '➔ 產值指數 (越往右，耗費心力越大)', color: '#AAA49D', font: { weight: 'bold' } }, grid: { color: 'rgba(0,0,0,0.04)' } },
-          y: { beginAtZero: true, title: { display: true, text: '➔ 案件預算 (越往上，營收越高)', color: '#AAA49D', font: { weight: 'bold' } }, grid: { color: 'rgba(0,0,0,0.04)' }, ticks: { callback: function(value) { return value >= 10000 ? (value / 10000) + ' 萬' : value; } } }
-        }
-      }
+      data: { datasets: [{ data: scatterData, backgroundColor: isHistoryMode ? 'rgba(124,92,191,0.65)' : 'rgba(225, 79, 75, 0.65)', borderColor: isHistoryMode ? '#7C5CBF' : '#E14F4B' }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
     });
 
-    // --- 排行榜渲染 ---
+    // 排行榜
     const listEl = document.getElementById('memberList');
     listEl.innerHTML = '';
     sorted.forEach(([name, val], i) => {
       const pct = Math.min((val.score/THRESHOLD)*100, 100);
       let cls = isHistoryMode ? 'purple' : (pct > 85 ? 'danger' : (pct > 55 ? 'warning' : 'ok'));
-      
       const avgKol = val.count > 0 ? Math.round(val.kolCount / val.count) : 0;
-      let insightTag = '';
-      if (avgKol >= 15) insightTag = `<span class="case-tag tag-complex">✦ 單案複雜</span>`;
-      else if (avgKol > 0 && avgKol <= 7 && val.count >= 4) insightTag = `<span class="case-tag tag-volume">▤ 大量小案</span>`;
-
       let statusWord = isHistoryMode ? 'DELIVERED' : (pct > 85 ? 'OVERLOAD' : (pct > 55 ? 'HEALTHY' : 'AVAILABLE'));
-      let fillGradient = isHistoryMode ? 'linear-gradient(90deg, #A88DEB, #7C5CBF)' : '';
-
       const row = document.createElement('div');
       row.className = 'member-row';
       row.innerHTML = `
@@ -896,27 +818,19 @@
           <div class="member-l">
             <span class="rank-num">#${i+1}</span>
             <div class="avatar av${i%6}">${name[0]}</div>
-            <div>
-              <div class="member-name">${name}</div>
-              <div class="member-cases">
-                ${val.count} 專案 <span style="opacity:0.4;margin:0 4px">|</span> 均 ${avgKol} 網紅 ${insightTag}
-              </div>
-            </div>
+            <div><div class="member-name">${name}</div><div class="member-cases">${val.count} 專案 | 均 ${avgKol} 網紅</div></div>
           </div>
           <div class="member-r">
             <div><span class="pts-num" style="color:${PALETTE[i%6]}">${Math.round(val.score)}</span><span class="pts-unit">PTS</span></div>
             <span class="status-chip chip-${isHistoryMode ? 'ok' : cls}" ${isHistoryMode ? 'style="color:#7C5CBF;background:rgba(124,92,191,0.1);border-color:rgba(124,92,191,0.2);"' : ''}>${statusWord}</span>
           </div>
         </div>
-        <div class="prog-track"><div class="prog-fill ${isHistoryMode ? '' : 'fill-'+cls}" style="width:${pct}%; ${fillGradient ? 'background:'+fillGradient : ''}"></div></div>
+        <div class="prog-track"><div class="prog-fill ${isHistoryMode ? '' : 'fill-'+cls}" style="width:${pct}%; ${isHistoryMode ? 'background:#7C5CBF' : ''}"></div></div>
       `;
       listEl.appendChild(row);
     });
   }
 
-  // ==========================================
-  // Sidebar 指南開關
-  // ==========================================
   const infoSidebar = document.getElementById('infoSidebar');
   const sidebarBackdrop = document.getElementById('sidebarBackdrop');
   function toggleSidebar(show) {
@@ -927,39 +841,31 @@
   document.getElementById('closeGuideBtn').addEventListener('click', () => toggleSidebar(false));
   sidebarBackdrop.addEventListener('click', () => toggleSidebar(false));
 
-  // ==========================================
-  // 🚀 核心資料讀取與【動態年份解析】
-  // ==========================================
   function loadDashboardData() {
     document.getElementById('lastUpdated').textContent = '正在連線...';
-
     const githubRawUrl = 'https://raw.githubusercontent.com/oakleykuo-svg/im-dashboard/main/data.json';
 
     fetch(githubRawUrl + '?v=' + Date.now())
       .then(r => { if (!r.ok) throw new Error("Data file not found"); return r.json(); })
       .then(data => {
         rawData = data;
-        
-        // 1. 更新最後連線時間
-        const dates = data.map(d => new Date(d[KEYS.DATE])).filter(d => !isNaN(d));
+        const dates = data.map(d => new Date(d[KEYS.DATE] || d['需求時間'])).filter(d => !isNaN(d));
         if(dates.length){
           const latest = new Date(Math.max(...dates));
           document.getElementById('lastUpdated').textContent = latest.toLocaleString('zh-TW', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' 更新';
         }
 
-        // 2. ✨ 動態年份提取機制 (為歷史洞察準備選項，但排除 2025 以前)
         let yearsSet = new Set();
         data.forEach(item => {
           const dStr = item[KEYS.DATE] || item['需求時間'];
           const d = new Date(dStr);
-          // 只有大於等於 2026 的年份才允許成為下拉選單選項
           if (!isNaN(d) && d.getFullYear() >= 2026) yearsSet.add(d.getFullYear());
         });
         
         const yearSelect = document.getElementById('yearSelect');
         yearSelect.innerHTML = '';
-        const sortedYears = Array.from(yearsSet).sort((a,b) => b - a); // 降冪排列
-        if (sortedYears.length === 0) sortedYears.push(new Date().getFullYear()); // 防呆
+        const sortedYears = Array.from(yearsSet).sort((a,b) => b - a);
+        if (sortedYears.length === 0) sortedYears.push(2026);
         
         sortedYears.forEach(y => {
           const opt = document.createElement('option');
@@ -967,10 +873,10 @@
           yearSelect.appendChild(opt);
         });
 
-        // 3. 渲染畫面
         render(filterData(rawData));
       })
       .catch(e => {
+        console.error(e);
         document.getElementById('lastUpdated').textContent = '載入失敗，請檢查權限';
       });
   }
