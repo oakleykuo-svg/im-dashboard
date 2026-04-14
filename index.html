@@ -609,16 +609,20 @@
   });
 
   // ==========================================
-  // 🧠 資料過濾核心邏輯
+  // 🧠 資料過濾核心邏輯 (加入 2026 時間結界)
   // ==========================================
   function filterData(data) {
+    // 🛡️ 時間結界：任何 2025 (含) 以前的案子，直接濾掉不看
+    const MIN_YEAR = 2026;
+
     if (!isHistoryMode) {
       // --- 活躍模式 (滾動天數) ---
       const now = new Date();
       return data.filter(item => {
         const dStr = item[KEYS.DATE] || item['需求時間'];
         const d = new Date(dStr);
-        if (isNaN(d)) return false;
+        // 如果日期無效，或是年份小於 2026，直接淘汰
+        if (isNaN(d) || d.getFullYear() < MIN_YEAR) return false;
 
         const pastDate = new Date(now);
         if (currentFilter === 'week') pastDate.setDate(now.getDate() - 7);
@@ -634,13 +638,14 @@
       
       return data.filter(item => {
         const st = item[KEYS.STATUS];
-        // 歷史模式只看「被歸檔的」或是「已結案/流局」的案子
         const validHistoryStatus = (item.isArchive === true || st === 'Closed' || st === 'Lost');
         if (!validHistoryStatus) return false;
 
         const dStr = item[KEYS.DATE] || item['需求時間'];
         const d = new Date(dStr);
-        if (isNaN(d) || d.getFullYear() !== y) return false;
+        
+        // 如果日期無效、年份不是選單選的年份、或是小於 2026，直接淘汰
+        if (isNaN(d) || d.getFullYear() !== y || d.getFullYear() < MIN_YEAR) return false;
 
         const m = d.getMonth() + 1; // 1-12 月
         if (p === 'h1' && m > 6) return false;
@@ -654,19 +659,7 @@
       });
     }
   }
-
-  function countUp(el,target,dur=750) {
-    const from = parseFloat(el.textContent.replace(/,/g,'')) || 0;
-    const s = performance.now();
-    function tick(t){
-      const p = Math.min((t-s)/dur,1), e=1-Math.pow(1-p,3);
-      const val = Math.round(from + (target-from)*e);
-      el.textContent = val.toLocaleString();
-      if(p<1) requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-  }
-
+  
   // ==========================================
   // 🎨 渲染引擎 (Render)
   // ==========================================
@@ -953,17 +946,18 @@
           document.getElementById('lastUpdated').textContent = latest.toLocaleString('zh-TW', {month:'short',day:'numeric',hour:'2-digit',minute:'2-digit'}) + ' 更新';
         }
 
-        // 2. ✨ 動態年份提取機制 (為歷史洞察準備選項)
+        // 2. ✨ 動態年份提取機制 (為歷史洞察準備選項，但排除 2025 以前)
         let yearsSet = new Set();
         data.forEach(item => {
           const dStr = item[KEYS.DATE] || item['需求時間'];
           const d = new Date(dStr);
-          if (!isNaN(d)) yearsSet.add(d.getFullYear());
+          // 只有大於等於 2026 的年份才允許成為下拉選單選項
+          if (!isNaN(d) && d.getFullYear() >= 2026) yearsSet.add(d.getFullYear());
         });
         
         const yearSelect = document.getElementById('yearSelect');
         yearSelect.innerHTML = '';
-        const sortedYears = Array.from(yearsSet).sort((a,b) => b - a); // 降冪排列 (新到舊)
+        const sortedYears = Array.from(yearsSet).sort((a,b) => b - a); // 降冪排列
         if (sortedYears.length === 0) sortedYears.push(new Date().getFullYear()); // 防呆
         
         sortedYears.forEach(y => {
