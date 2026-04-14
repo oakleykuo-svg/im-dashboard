@@ -762,8 +762,16 @@
     if(mChart) mChart.destroy();
     mChart = new Chart(document.getElementById('memberChart').getContext('2d'), {
       type: 'bar',
-      data: { labels, datasets:[{ label:'產值指數', data:vals, backgroundColor: bCols.map(c=>c+'28'), borderColor: bCols, borderWidth:2, borderRadius:6 }]},
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true } } }
+      data: { labels: sorted.map(x => x[0]), datasets:[{ label:'PTS', data: sorted.map(x => Math.round(x[1].score)), backgroundColor: PALETTE.map(c=>c+'28'), borderColor: PALETTE, borderWidth: 2, borderRadius: 5 }] },
+      options: { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        plugins: { legend: { display: false } },
+        scales: { 
+          x: { grid: { display: false } }, // 隱藏 X 軸格線
+          y: { grid: { display: false }, beginAtZero: true } // 隱藏 Y 軸格線
+        }
+      }
     });
 
     const sL = STAGE_ORDER.filter(s => stages[s]);
@@ -796,11 +804,44 @@
       }
     });
 
+    // --- 替換此區塊：加回矩陣圖背景與標籤 ---
     if(matrixChartInstance) matrixChartInstance.destroy();
     matrixChartInstance = new Chart(document.getElementById('matrixChart').getContext('2d'), {
       type: 'scatter',
-      data: { datasets: [{ data: scatterData, backgroundColor: isHistoryMode ? 'rgba(124,92,191,0.65)' : 'rgba(225, 79, 75, 0.65)', borderColor: isHistoryMode ? '#7C5CBF' : '#E14F4B' }] },
-      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } }
+      data: { datasets: [{ data: scatterData, backgroundColor: isHistoryMode ? '#7C5CBF88' : '#E14F4B88', borderColor: isHistoryMode ? '#7C5CBF' : '#E14F4B', pointRadius: 6 }] },
+      plugins: [{
+        id: 'quadrantBackgrounds',
+        beforeDraw(chart) {
+          const { ctx, chartArea: { left, top, right, bottom } } = chart;
+          const xCenter = left + (right - left) / 2;
+          const yCenter = top + (bottom - top) / 2;
+          ctx.save();
+          // 1. 繪製四象限底色
+          ctx.fillStyle = 'rgba(212, 130, 10, 0.05)'; ctx.fillRect(left, top, xCenter - left, yCenter - top); // 左上
+          ctx.fillStyle = 'rgba(43, 114, 200, 0.03)'; ctx.fillRect(xCenter, top, right - xCenter, yCenter - top); // 右上
+          ctx.fillStyle = 'rgba(27, 158, 90, 0.03)';  ctx.fillRect(left, yCenter, xCenter - left, bottom - yCenter); // 左下
+          ctx.fillStyle = 'rgba(225, 79, 75, 0.06)';  ctx.fillRect(xCenter, yCenter, right - xCenter, bottom - yCenter); // 右下
+          
+          // 2. 繪製區域名稱文字
+          ctx.fillStyle = 'rgba(0, 0, 0, 0.15)';
+          ctx.font = 'bold 15px "DM Sans"';
+          ctx.textAlign = 'center';
+          ctx.fillText('👑 金雞母區', left + (xCenter - left) / 2, top + 25);
+          ctx.fillText('🚨 辛酸血淚區', xCenter + (right - xCenter) / 2, bottom - 15);
+          ctx.fillText('🟢 正常健康區', xCenter + (right - xCenter) / 2, top + 25);
+          ctx.fillText('🟢 正常健康區', left + (xCenter - left) / 2, bottom - 15);
+          ctx.restore();
+        }
+      }],
+      options: { 
+        responsive: true, 
+        maintainAspectRatio: false, 
+        plugins: { legend: { display: false } },
+        scales: {
+          x: { beginAtZero: true, title: { display: true, text: '➔ 量能消耗 (PTS)', font: { size: 10, weight: 'bold' } } },
+          y: { beginAtZero: true, title: { display: true, text: '➔ 專案預算 ($)', font: { size: 10, weight: 'bold' } } }
+        }
+      }
     });
 
     // 排行榜
