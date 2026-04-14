@@ -555,8 +555,8 @@
     PROPOSED_KOL: "提案網紅數", EXEC_KOL: "執行網紅數", BUDGET: "預算" 
   };
   
-  const STAGE_COLORS = { 'Executing':'#E14F4B','Contacting':'#D4820A','Proposed':'#2B72C8','Brief':'#7C5CBF','Closed':'#1B9E5A','Lost':'#C0BBB4' };
-  const STAGE_ORDER = ['Executing','Contacting','Proposed','Brief','Closed','Lost'];
+  const STAGE_COLORS = { 'Executing':'#E14F4B','Contacting':'#D4820A','Proposed':'#2B72C8','Brief':'#7C5CBF','Closed':'#1B9E5A','Lost':'#C0BBB4', 'Expired (逾期歸檔)':'#888888' };
+  const STAGE_ORDER = ['Executing','Contacting','Proposed','Brief','Closed','Lost', 'Expired (逾期歸檔)'];
   const PALETTE = ['#E14F4B','#2B72C8','#7C5CBF','#1B9E5A','#D4820A','#888888'];
   const THRESHOLD = 800;
 
@@ -677,13 +677,13 @@
     data.forEach(item => {
       const isArchive = item["isArchive"] === true;
       const n = item[KEYS.NAME] || 'Unknown';
-      const s = parseFloat(item[KEYS.SCORE]) || 0;
       const st = item[KEYS.STATUS] || 'Other';
+      let s = parseFloat(item[KEYS.SCORE]) || 0;
       
       let k = parseInt((st === 'Executing' || st === 'Closed') ? (item[KEYS.EXEC_KOL] || item[KEYS.PROPOSED_KOL]) : (item[KEYS.PROPOSED_KOL] || item[KEYS.EXEC_KOL])) || 0;
       
       if (!isHistoryMode) {
-        // [活躍模式] 排除歸檔與死掉的案子
+        // --- [活躍模式] ---
         if (!isArchive && st !== 'Lost' && st !== 'Closed') {
           totalLoad += s;
           if(st === 'Executing') exCount++;
@@ -694,16 +694,34 @@
         }
         stages[st] = (stages[st] || 0) + 1;
       } else {
-        // [歷史模式] 只統計順利結案的數據給人員戰績，流局拿去算流局率
+        // --- [歷史模式] ---
+        
+        // 🚨 修復 1：還原 Closed 案件的「滿血產值」
         if (st === 'Closed') {
-          totalLoad += s;
-          exCount++; // 在歷史模式中，這代表 Closed Count
+          // 動態抓取規格數與特殊狀況
+          let specVal = parseFloat(item["操作規格數"]);
+          if (isNaN(specVal)) specVal = calculateSpecWeight(item["操作內容"] || "");
+          const special = item["特殊狀況"] || "";
+          let multiplier = special.includes("急件") ? 1.5 : (special.includes("溝通成本高") ? 2.0 : 1.0);
+
+          // 以 Executing 的健康權重 (4.0) 重新計算該案的實質交付價值
+          let trueDeliveredScore = 4.0 * k * specVal * multiplier;
+          
+          totalLoad += trueDeliveredScore;
+          exCount++; 
           if(!members[n]) members[n] = {score:0, count:0, kolCount:0};
-          members[n].score += s;
+          members[n].score += trueDeliveredScore;
           members[n].count++;
           members[n].kolCount += k;
         }
-        stages[st] = (stages[st] || 0) + 1;
+
+        // 🚨 修復 2：過濾圓餅圖的「殭屍案」
+        let displayStage = st;
+        // 如果是在 Archive 裡，但狀態卻不是 Closed 或 Lost，一律視為超過 21 天的「逾期歸檔」
+        if (isArchive && st !== 'Closed' && st !== 'Lost') {
+          displayStage = 'Expired (逾期歸檔)';
+        }
+        stages[displayStage] = (stages[displayStage] || 0) + 1;
       }
     });
 
