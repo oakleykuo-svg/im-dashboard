@@ -914,23 +914,22 @@
           legend: { display: false },
           tooltip: {
             backgroundColor: 'rgba(255, 255, 255, 0.98)', 
-            titleColor: '#000000', // ✨ 絕對黑字
-            bodyColor: '#444444', 
+            titleColor: '#000000', 
+            bodyColor: '#1A1814', // ✨ 加深整體字色，接近黑字效果
             borderColor: 'rgba(0,0,0,0.1)',
             borderWidth: 1,
             padding: 14,
-            titleFont: { size: 15, family: "'DM Sans', sans-serif", weight: '800' }, // ✨ 極粗體
-            bodyFont: { size: 12, family: "'DM Sans', sans-serif", weight: '600' },
+            titleFont: { size: 0 }, // 隱藏會出錯的單一標題
+            bodyFont: { size: 13, family: "'DM Sans', sans-serif", weight: '700' }, // ✨ 整體加粗，確保專案名醒目
             displayColors: false,
             callbacks: {
-              // 標題只顯示專案名稱，並強制黑字加粗
-              title: function(context) {
-                return `📁 ${context[0].raw.name || "未命名專案"}`; 
+              title: function() { 
+                return ''; 
               },
-              // 內文顯示其他詳細資訊
               label: function(context) {
                 const d = context.raw;
                 return [
+                  `📁 專案：【 ${d.name || "未命名專案"} 】`, // ✨ 專案名稱回歸各自區塊，確保每個點都顯示！
                   `👤 負責人：${d.pic}`,
                   `🏷️ 階段：${d.stage}`,
                   `💰 預算：$${d.y.toLocaleString()}`,
