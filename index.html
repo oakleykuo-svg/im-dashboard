@@ -910,7 +910,36 @@
       options: { 
         responsive: true, 
         maintainAspectRatio: false, 
-        plugins: { legend: { display: false } },
+        plugins: { 
+          legend: { display: false },
+          tooltip: {
+            backgroundColor: 'rgba(255, 255, 255, 0.95)', // 質感白底毛玻璃
+            titleColor: '#1A1814',
+            bodyColor: '#6B6760',
+            borderColor: 'rgba(0,0,0,0.1)',
+            borderWidth: 1,
+            padding: 12,
+            titleFont: { size: 13, family: "'DM Sans', sans-serif", weight: 'bold' },
+            bodyFont: { size: 12, family: "'DM Sans', sans-serif", weight: '500' },
+            displayColors: false, // 隱藏預設的無用小色塊
+            callbacks: {
+              // 標題顯示專案名稱
+              title: function(context) {
+                return context[0].raw.name || "未命名專案"; 
+              },
+              // 內文顯示負責人、階段與數據
+              label: function(context) {
+                const d = context.raw;
+                return [
+                  `👤 負責人：${d.pic}`,
+                  `🏷️ 階段：${d.stage}`,
+                  `💰 預算：$${d.y.toLocaleString()}`,
+                  `🔥 消耗量能：${d.x} PTS`
+                ];
+              }
+            }
+          }
+        },
         scales: {
           x: { beginAtZero: true, title: { display: true, text: '➔ 量能消耗 (PTS)', font: { size: 11, weight: 'bold' } }, grid: { color: 'rgba(0,0,0,0.03)' } },
           y: { beginAtZero: true, title: { display: true, text: '➔ 專案預算 ($)', font: { size: 11, weight: 'bold' } }, grid: { color: 'rgba(0,0,0,0.03)' } }
