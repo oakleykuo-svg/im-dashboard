@@ -923,18 +923,20 @@
             bodyFont: { size: 12, family: "'DM Sans', sans-serif", weight: '500' },
             displayColors: false, // 隱藏預設的無用小色塊
             callbacks: {
-              // 標題顯示專案名稱
+              // 隱藏預設的單一標題，避免多個點重疊時只顯示第一個專案名
               title: function(context) {
-                return context[0].raw.name || "未命名專案"; 
+                return ''; 
               },
-              // 內文顯示負責人、階段與數據
+              // 將專案名稱移入內文，讓每一個點都有自己完整的獨立資訊
               label: function(context) {
                 const d = context.raw;
                 return [
+                  `📁 專案：${d.name || "未命名專案"}`,
                   `👤 負責人：${d.pic}`,
                   `🏷️ 階段：${d.stage}`,
                   `💰 預算：$${d.y.toLocaleString()}`,
-                  `🔥 消耗量能：${d.x} PTS`
+                  `🔥 消耗量能：${d.x} PTS`,
+                  `---------------------------` // 虛線分隔，多個點重疊時才不會看錯
                 ];
               }
             }
