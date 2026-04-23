@@ -604,6 +604,44 @@
     return weight === 0 ? 1 : weight; 
   }
 
+  // ✨ 新增：預算字串清洗與計算工具 (跨欄位乘算網紅人數)
+  function parseBudget(budgetStr, execKOL, proposedKOL) {
+    if (!budgetStr) return 0;
+    let str = String(budgetStr).toUpperCase().replace(/\s+/g, '');
+    if (str.includes('TBC') || str === '') return 0;
+
+    // 判斷是否為單價模式 (/位, /人, 每位, 一位, 一人)
+    const isUnitPrice = /\/位|\/人|每位|一位|一人/.test(str);
+
+    // 移除全形與半形括號內的備註，避免干擾 (例如 "素材授權另計")
+    str = str.replace(/\([^)]*\)/g, '').replace(/（[^）]*）/g, '');
+
+    // 移除金錢符號與千分位逗號
+    str = str.replace(/\$|,/g, '');
+
+    // 擷取所有「數字+萬」或「純數字」的組合
+    const matches = str.match(/\d+(?:\.\d+)?萬?/g);
+    if (!matches) return 0;
+
+    // 抓取最後一個匹配項目 (解決區間問題，如 30000-80000 抓最大值 80000)
+    let targetValue = matches[matches.length - 1];
+    
+    let finalNumber = 0;
+    if (targetValue.includes('萬')) {
+      finalNumber = parseFloat(targetValue.replace('萬', '')) * 10000;
+    } else {
+      finalNumber = parseFloat(targetValue);
+    }
+
+    // 如果是單價，跨欄位乘以網紅人數 (優先取執行數，若無則取提案數。若都沒填，最少算 1)
+    if (isUnitPrice) {
+      let kolCount = parseInt(execKOL) || parseInt(proposedKOL) || 1;
+      finalNumber = finalNumber * kolCount;
+    }
+
+    return finalNumber;
+  }
+
   // ==========================================
   // 🕒 模式切換邏輯
   // ==========================================
@@ -818,7 +856,10 @@
       const st = item[KEYS.STATUS];
       if ((!isHistoryMode && st !== 'Lost' && st !== 'Closed' && !item.isArchive) || (isHistoryMode && st === 'Closed')) {
         const pts = parseFloat(item[KEYS.SCORE]) || 0;
-        const budget = parseFloat(item[KEYS.BUDGET]) || 0;
+        
+        // ✨ 修改：套用全新的預算清洗工具，並傳入網紅人數以計算真實總價
+        const budget = parseBudget(item[KEYS.BUDGET], item[KEYS.EXEC_KOL], item[KEYS.PROPOSED_KOL]);
+        
         if (budget > 0 && pts > 0) scatterData.push({ x: pts, y: budget, name: item["專案名稱"] || "未命名", pic: item[KEYS.NAME] || "Unknown", stage: st });
       }
     });
