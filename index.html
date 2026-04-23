@@ -913,30 +913,29 @@
         plugins: { 
           legend: { display: false },
           tooltip: {
-            backgroundColor: 'rgba(255, 255, 255, 0.95)', // 質感白底毛玻璃
-            titleColor: '#1A1814',
-            bodyColor: '#6B6760',
+            backgroundColor: 'rgba(255, 255, 255, 0.98)', 
+            titleColor: '#000000', // ✨ 絕對黑字
+            bodyColor: '#444444', 
             borderColor: 'rgba(0,0,0,0.1)',
             borderWidth: 1,
-            padding: 12,
-            titleFont: { size: 13, family: "'DM Sans', sans-serif", weight: 'bold' },
-            bodyFont: { size: 12, family: "'DM Sans', sans-serif", weight: '500' },
-            displayColors: false, // 隱藏預設的無用小色塊
+            padding: 14,
+            titleFont: { size: 15, family: "'DM Sans', sans-serif", weight: '800' }, // ✨ 極粗體
+            bodyFont: { size: 12, family: "'DM Sans', sans-serif", weight: '600' },
+            displayColors: false,
             callbacks: {
-              // 隱藏預設的單一標題，避免多個點重疊時只顯示第一個專案名
+              // 標題只顯示專案名稱，並強制黑字加粗
               title: function(context) {
-                return ''; 
+                return `📁 ${context[0].raw.name || "未命名專案"}`; 
               },
-              // 將專案名稱移入內文，讓每一個點都有自己完整的獨立資訊
+              // 內文顯示其他詳細資訊
               label: function(context) {
                 const d = context.raw;
                 return [
-                  `📁 專案：${d.name || "未命名專案"}`,
                   `👤 負責人：${d.pic}`,
                   `🏷️ 階段：${d.stage}`,
                   `💰 預算：$${d.y.toLocaleString()}`,
                   `🔥 消耗量能：${d.x} PTS`,
-                  `---------------------------` // 虛線分隔，多個點重疊時才不會看錯
+                  `---------------------------` 
                 ];
               }
             }
